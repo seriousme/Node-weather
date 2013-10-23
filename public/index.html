@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+<link href="http://code.jquery.com/ui/jquery-ui-git.css" rel="stylesheet" type="text/css" />
+<script src="http://code.jquery.com/jquery-git.js"></script>
+<script src="http://code.jquery.com/ui/jquery-ui-git.js"></script>
+<script>  $(function() {    $( "#tabs" ).tabs();  });  </script>
+<meta charset=utf-8 />
+<title>Weerstation</title>
+</head>
+<body>
+    <h1>Weerstation</h1>
+  
+  <div id="tabs">
+    <ul>
+    <li><a href="#tabs-1">Buiten</a></li>
+    <li><a href="#tabs-2">Kas</a></li>
+    </ul>
+      <div id="tabs-1"> 
+        <div id='container1'></div>
+      </div>  
+      <div id="tabs-2"> 
+        <div id='container2'></div>
+    </div>
+  </div>
+    
+
+    <script id='myTemplate' type='text/ractive'>
+		<h3>Temperatuur</h3>
+        <p>Nu: {{temp.current}}</p>
+        <p>Maximum: {{temp.max}}</p>
+        <p>Minimum:  {{temp.min}}</p>
+		<h3>Luchtvochtigheid</h3>
+        <p>Nu: {{humid.current}}</p>
+        <p>Maximum: {{humid.max}}</p>
+        <p>Minimum:  {{humid.min}}</p>
+    </script>
+
+    <script src='js/Ractive.min.js'></script>
+    <script src='js/data.js'></script>
+</body>
+</html>

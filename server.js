@@ -1,49 +1,61 @@
 
-var ls=require('./lightswitch');
+var levelup=require('level');
+var db = levelup('weatherDB',{ valueEncoding: 'json' });
 
-var state={
-    'auto':'on',
-    'device1':'off',
-    'device2':'off',
-    'device3':'off',
-    'device4':'off',
-    'device5':'off',
-	'power':{}
-};
-
-var statevals={'on':'1','off':'0'};
-
-function handlePower(query,client){
-	if (! query) return;
-	if (! query.cmd) return;
-	client='ip' + client;
-	if (query.cmd === 'on'){
-		if (Object.keys(state.power).length === 0)
-			ls.switch('power',query.cmd);
-		state.power[client]='active';
-	}
-	if (query.cmd === 'off'){
-		delete(state.power[client]);
-		if (Object.keys(state.power).length === 0)
-			ls.switch('power',query.cmd);
-	}
-	if (query.cmd === 'del'){
-		state.power={};
-		ls.switch('power','off');
-	}
+function setMax(a,i,b){
+	if (typeof a[i] == 'undefined')
+		a[i]=b;
+	else
+		if (b > a[i])
+			a[i]=b;
 }
 
-function handleState(query){
-	if (! query) return;
-	Object.keys(query).forEach(function(key) {
-        var val = query[key];
-		if (! statevals[val]) return;
-        if (state[key] !== val){
-			ls.switch(key,val);
-			state[key] = val;
-		}
+function setMin(a,i,b){
+	if (typeof a[i] == 'undefined')
+		a[i]=b;
+	else
+		if (b < a[i])
+			a[i]=b;
+}
+//db.createReadStream({end:2014,limit:2})
+
+function processRecord(items,data){
+	console.log(data);
+	var id=data.id;
+	if (! items[id]){
+	items[id]={
+		id: id,
+		temp:{},
+		humid:{},
+		datapoints: []
+		};
+	}
+
+	setMax(items[id].temp,'max',data.temp);
+	setMin(items[id].temp,'min',data.temp);
+	setMax(items[id].humid,'max',data.humid);
+	setMin(items[id].humid,'min',data.humid);
+	items[id].batt=data.batt;
+	items[id].at=data.date;
+	items[id].temp.current=data.temp;
+	items[id].humid.current=data.humid;
+	items[id].datapoints.push({
+		temp: data.temp,
+		humid: data.humid,
+		at:data.date
 	});
 
+}
+
+function getData(query,cb){
+	var result={};
+	db.createReadStream(query)
+		.on('data', function (data) {
+			processRecord(result,data.value);
+		})
+		.on('end', function (){
+			cb(result);
+		});
 }
 
 var connect = require('connect');
@@ -54,13 +66,8 @@ var app = connect()
   .use(connect.logger('dev'))
   .use(connect.static('public'))
   .use(connect.query())
-  .use('/cgi-bin/switch',function(req, res){
-    handleState(req.query);
-    res.end(JSON.stringify(state));
-   })
-   .use('/cgi-bin/power',function(req, res){
-    handlePower(req.query,req.connection.remoteAddress);
-    res.end(JSON.stringify(state));
+  .use('/weather',function(req, res){
+    getData(req.query,function(data){ res.end(JSON.stringify(data))});
    })
   .use(function(req, res){
     res.writeHead(404, {'content-type':'text/plain'});
