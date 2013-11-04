@@ -5,10 +5,10 @@ var host = 'localhost';
 var port = 80;
 
 require ('./jsonDateParse');
-var rs=require ('./readSerial');
 
 var levelup=require('level');
 var db = levelup('weatherDB',{ valueEncoding: 'json' });
+var rs=require ('./readSerial');
 rs.startSerial(db);
 
 var ranges={
@@ -55,6 +55,7 @@ function setAvg(a,c,i,b){
 	}
 	else{
 		a[i]=(a[c]*a[i]+b)/++a[c];
+		a[i]=a[i].toFixed(2);
 	}
 }
 

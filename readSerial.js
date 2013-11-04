@@ -5,7 +5,10 @@ var com = require("serialport");
 //var comPort='/dev/ttyUSB0';
 var comPort='COM5';
 
-var sensors={};
+var sensors={ 
+	'18':{ name:'Buiten' },
+	'4C':{ name:'Kas' }
+};
 // log once every five minutes
 var timeInterval=5000*60*1;
 
@@ -30,9 +33,13 @@ module.exports= {
 		  var data=msg.split(' ');
 		  if (data[0]==='IT+')  {
 			var id=data[2];
-			console.log("id",id);
 			if (typeof(sensors[id])=='undefined'){
 				sensors[id]={};
+			}
+			else{
+				id=sensors[id].name;
+				if (typeof(sensors[id])=='undefined')
+					sensors[id]={};
 			}
 			if (typeof(sensors[id].nextTime)=='undefined'){
 				sensors[id].nextTime=0;
@@ -43,6 +50,7 @@ module.exports= {
 					data[7]='ok';
 				var record={ date: datestr,
 				   id: id,
+				   sensorid: data[2],
 				   temp: Number(data[4]),
 				   humid: Number(data[6]),
 				   batt: data[7],
