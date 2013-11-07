@@ -3,7 +3,9 @@ var port = 80;
 require ('./jsonDateParse');
 
 var levelup=require('level');
-var db = levelup(__dirname+'/weatherDB',{ valueEncoding: 'json' });
+var dbname= __dirname + '/weatherDB';
+var db = levelup(dbname,{ valueEncoding: 'json' });
+console.log("using database: ",dbname); 
 var rs=require ('./readSerial');
 rs.startSerial(db);
 
@@ -173,7 +175,7 @@ server.get('/weather',send );
 server.get('/weather/:range',send );
 // this one needs to be last
 server.get('/.*',restify.serveStatic({
-  directory: './public',
+  directory: __dirname+'/public',
   default:'index.html'
 }));
     

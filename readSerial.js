@@ -26,9 +26,9 @@ module.exports= {
 
 		serialPort.on('data', function(msg) {
 		  var now=new Date();
-		  var newTime=now.getTime();
+		  var nowTime=now.getTime();
 		  var datestr=now.toJSON();
-		  console.log(datestr,msg);
+		  //console.log(datestr,msg);
 		  // IT+ ID: F0 Temp: 14.8 Humidity: 84 RawData: 9F 05 48
 		  var data=msg.split(' ');
 		  if (data[0]==='IT+')  {
@@ -45,7 +45,8 @@ module.exports= {
 				sensors[id].nextTime=0;
 			}
 			
-			if (newTime >= sensors[id].nextTime){
+			if (nowTime >= sensors[id].nextTime){
+		  		console.log(datestr,msg);
 				if (data[7] != 'L')
 					data[7]='ok';
 				var record={ date: datestr,
@@ -56,7 +57,7 @@ module.exports= {
 				   batt: data[7],
 				   msg: msg
 				};
-				sensors[id].nextTime=newTime+timeInterval;
+				sensors[id].nextTime=nowTime+timeInterval;
 				db.put(datestr,record);
 			}
 		  }

@@ -52,7 +52,7 @@ ractive.observe( 'sensorType', function ( value) {
 });
 
 // load our data
-$.getJSON( 'weatherday.json' ).then( function ( data ) {
+$.getJSON( '/weather/day' ).then( function ( data ) {
 	for (id in data){
 		sensorIds.push({name:id});
 		if (typeof(currentSensor)=='undefined')
