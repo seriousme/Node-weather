@@ -1,11 +1,13 @@
 // load our data
 
 
-$.getJSON( '/weather' ).then( function ( sensordata) {
-	var sensors=[];
-	for (sensor in sensordata)
-		sensors.push({name:sensor,tab: sensor+'Tab'});
+$.getJSON( '/weathernow.json' ).then( function ( sensordata) {
 	
+	var sensors=[];
+	for (sensor in sensordata){
+		sensors.push({name:sensor,tab: sensor+'Tab'});
+		alert(sensordata[sensor].at);
+	}
 	var ractiveTab=new Ractive({
 		el: tabs,
 		template: '#tabsTemplate',

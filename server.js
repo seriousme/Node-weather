@@ -1,13 +1,9 @@
-
-
-
-var host = 'localhost';
 var port = 80;
 
 require ('./jsonDateParse');
 
 var levelup=require('level');
-var db = levelup('weatherDB',{ valueEncoding: 'json' });
+var db = levelup(__dirname+'/weatherDB',{ valueEncoding: 'json' });
 var rs=require ('./readSerial');
 rs.startSerial(db);
 
@@ -66,6 +62,7 @@ function setMinMax(result,data){
 	setMin(result.humid,'min',data.humid);
 	setAvg(result.temp,'points','avg',data.temp);
 	setAvg(result.humid,'points','avg',data.humid);
+	result.at=data.date;
 }
 
 
@@ -76,7 +73,6 @@ function processRecordNow(item,data){
 	}
 	setMinMax(item,data);
 	item.batt=data.batt;
-	item.at=data.date;
 	item.temp.current=data.temp;
 	item.humid.current=data.humid;
 }
@@ -109,7 +105,6 @@ function processRecordInterval(item,data,range){
 	}
 	else{
 		if (! ranges[range].inRange(item.lastDate,data.date)){
-			item.interval.at=data.date;
 			item.datapoints.push(item.interval);
 			item.interval={
 				temp:{},
@@ -185,8 +180,8 @@ server.get('/.*',restify.serveStatic({
 
 
 
-server.listen(port,host);
-console.log('Server is running at','http://'+host+':'+port);
+server.listen(port);
+console.log('Server is running at port',port);
 
 
 

@@ -2,8 +2,8 @@
           
 		  
 var com = require("serialport");
-//var comPort='/dev/ttyUSB0';
-var comPort='COM5';
+var comPort='/dev/ttyUSB0';
+//var comPort='COM5';
 
 var sensors={ 
 	'18':{ name:'Buiten' },
@@ -54,10 +54,9 @@ module.exports= {
 				   temp: Number(data[4]),
 				   humid: Number(data[6]),
 				   batt: data[7],
-				   msg: msg,
-				   nextTime: newTime+timeInterval
+				   msg: msg
 				};
-				
+				sensors[id].nextTime=newTime+timeInterval;
 				db.put(datestr,record);
 			}
 		  }
