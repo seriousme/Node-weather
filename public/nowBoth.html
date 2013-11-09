@@ -24,28 +24,24 @@
       <label>°C <input type='radio' name='{{sensorType}}' value='temp' checked></label>
       <label>%Humid <input type='radio' name='{{sensorType}}' value='humid'></label>
     </div>
-
-    <!-- dropdown menu -->
-    <select value='{{selected}}'>
-      {{#sensors}}
-      <option value='{{name}}'>{{name}}</option>
-      {{/sensors}}
-    </select>
   </div>
+  {{#sensorData}}
   <div class='panel'>
+	<h2>{{name}}</h2>
 	<div class="summary">
-	<p>Maximum: {{format(data.max, sensorType)}}</p>
-	<p>Gemiddeld: {{format(data.avg, sensorType)}}</p>
-	<p>Minimum:  {{format(data.min, sensorType)}}</p>
+	<p>Maximum: {{format(max, sensorType)}}</p>
+	<p>Gemiddeld: {{format(avg, sensorType)}}</p>
+	<p>Minimum:  {{format(min, sensorType)}}</p>
 	</div>
-	<div class="valueText">{{format(data.current, sensorType)}}</div>
+	<div class="valueText">{{format(current, sensorType)}}</div>
   </div>
+  {{#sensorData}}
   
 </script>
 
 <script src='js/Ractive.min.js'></script>
 <script src='js/jsonDateParse.js'></script>
 
-<script src='js/now.js'></script>
+<script src='js/nowBoth.js'></script>
 </body>
 </html>

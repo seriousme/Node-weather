@@ -53,7 +53,7 @@ function setAvg(a,c,i,b){
 	}
 	else{
 		a[i]=(a[c]*a[i]+b)/++a[c];
-		a[i]=a[i].toFixed(2);
+		a[i]=Number(a[i].toFixed(2));
 	}
 }
 
@@ -142,7 +142,7 @@ function adjustJsonDate(query){
 		query.range='now';
 	if (query.end)
 		d=JSON.parse(query.end);
-	console.log('parsed date',d);
+	//console.log('parsed date',d);
 	if (typeof(d.date)!='object')
 		d=new Date();
 	ranges[query.range].adjust(d);
