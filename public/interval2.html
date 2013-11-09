@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+<link rel="stylesheet" type="text/css" href="styles/style.css">
+<title>Weerstation</title>
+</head>
+<body>
+	<div class="container">
+		<div id="output" class="temperatures">
+		</div>
+	</div>
+
+  
+<script id='template' type='text/ractive'>
+  
+  <!-- header and options -->
+  <div class='header'>
+    <h2>Weerstation</h2>
+    
+    <!-- switch between temp and humid -->
+    <div class='radio-group'>
+      <label>°C <input type='radio' name='{{sensorType}}' value='temp' checked></label>
+      <label>%Humid <input type='radio' name='{{sensorType}}' value='humid'></label>
+    </div>
+
+    <!-- dropdown menu -->
+    <select value='{{selected}}'>
+      {{#sensors}}
+      <option value='{{name}}'>{{name}}</option>
+      {{/sensors}}
+    </select>
+  </div>
+
+  
+  <!-- the chart -->
+  <div class='bar-chart'>
+    {{#selectedRange}}
+      
+      <!-- 24 sections, one for hour -->
+      {{#items:i}}
+        <div class='bar-group' style='width: {{ 100 / items.length }}%;'>
+          
+          <!-- average high temperature -->
+          <div class='bar-outer high {{ (max >= 0) ? "positive" : "negative" }}' style='height: {{ scale(max, sensorType) }}%;'>
+            <div class='bar-inner' style='background-color: {{ getColor(max) }};'></div>
+            <span>{{ format(max, sensorType) }}</span>
+          </div>
+
+
+          <!-- average low temperature -->
+          <div class='bar-outer low {{ (min >= 0) ? "positive" : "negative" }}' style='height: {{ scale(min, sensorType) }}%;'>
+            <div class='bar-inner' style='background-color: {{ getColor(min) }};'></div>
+            <span>{{ format(min, sensorType) }}</span>
+          </div>
+
+          <!-- month label (JFMAMJJASOND) -->
+          <span class='month-label'>{{ labels[i] }}</span>
+        </div>
+      {{/items}}
+    {{/selectedRange}}
+
+    <!-- horizontal line representing freezing -->
+    <div class='axis'></div>
+  </div>
+
+
+</script>
+
+<script src='js/Ractive.min.js'></script>
+<script src='js/jsonDateParse.js'></script>
+
+<script src='js/interval2.js'></script>
+</body>
+</html>
