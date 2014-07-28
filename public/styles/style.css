@@ -188,3 +188,11 @@
 .summary{
 	float: right;
 }
+
+.footer {
+	font-family: 'Helvetica Neue', Arial;
+	font-size: 0.7em;
+	position: absolute;
+	bottom: 0px;
+	right: 20px;
+}
