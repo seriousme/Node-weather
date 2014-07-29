@@ -22,7 +22,7 @@
     <!-- switch between temp and humid -->
     <div class='radio-group'>
       <label>°C <input type='radio' name='{{sensorType}}' value='temp' checked></label>
-      <label>%Humid <input type='radio' name='{{sensorType}}' value='humid'></label>
+      <label>%Luchtv. <input type='radio' name='{{sensorType}}' value='humid'></label>
     </div>
 
     <!-- dropdown menu -->
@@ -41,14 +41,12 @@
 	<div class="valueText">{{format(data.current, sensorType)}}</div>
   </div>
   <div class="footer">
-	Laatste wijziging: {{data.lastUpdate}}
+	Laatste wijziging: {{datefmt(data.lastUpdate)}}
   </div>
   
 </script>
 
 <script src='js/Ractive.min.js'></script>
-<script src='js/jsonDateParse.js'></script>
-
 <script src='js/now.js'></script>
 </body>
 </html>

@@ -62,7 +62,7 @@ function getCurrentSensorData(id,type){
 	});
 	// and the exact last one
 	query=dbUrl+'?reduce=false&descending=true&limit=1&startkey='+ JSON.stringify(endparams);
-	$.getJSON(query).then( function ( data ) {
+	getJSON(query).then( function ( data ) {
 			if (data.rows.length > 0) {
 				sensorData[id][type].current=data.rows[0].value;
 				sensorData[id][type].lastUpdate=data.rows[0].id;
@@ -88,11 +88,15 @@ ractive = new Ractive({
 	  else
 		return val.toFixed( 1 ) + '%';
     },
+	datefmt: function (val){
+		var d=new Date(val);
+		return (d.toLocaleString());
+	}
   }
 });
 
 function updateData(){
-	$.getJSON(dbUrl+ '?group_level=1' ).then( function ( data ) {
+	getJSON(dbUrl+ '?group_level=1' ).then( function ( data ) {
 		for (var idx in data.rows){
 			var row= data.rows[idx]
 			var id= row.key[0]
