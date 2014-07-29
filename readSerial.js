@@ -1,17 +1,18 @@
 // acquire weather data from 868 weather sensors using the IT+ protocol via a JeeLink
           
+var nano = require('nano')('http://user:pwd@localhost:5984')
+var weatherdb = nano.use('weatherdb');
 		  
 var com = require("serialport");
 var comPort='/dev/ttyUSB0';
 //var comPort='COM5';
 
 var sensors={ 
-	'18':{ name:'Buiten' },
-	'4C':{ name:'Kas' }
+	'F8':{ name:'Buiten' },
+	'6C':{ name:'Kas' }
 };
 // log once every five minutes
 var timeInterval=5000*60*1;
-
 
 module.exports= { 
 	startSerial: function (db){
@@ -59,6 +60,14 @@ module.exports= {
 				};
 				sensors[id].nextTime=nowTime+timeInterval;
 				db.put(datestr,record);
+				weatherdb.insert(record, datestr, function(err, body, header) {
+			  		if (err) {
+						console.log('[weatherdb.insert] ', err.message);
+						return;
+			  		}
+			  		//console.log('you have inserted')
+			  		//console.log(body);
+				});
 			}
 		  }
 		});
