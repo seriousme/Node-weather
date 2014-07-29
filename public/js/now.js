@@ -2,7 +2,7 @@ var sensorData={}, ractive;
 var sensorIds=[];
 var currentSensor;
 var currentType='temp';
-var defaultSensor='Buiten2';
+var defaultSensor='Buiten';
 var sensorTypes={temp:0,humid:1};
 //var dbUrl= 'http://'+location.hostname+':5984/weatherdb/_design/data/_view/byhour';
 var dbUrl= 'http://raspiw:5984/weatherdb/_design/data/_view/byhour';
