@@ -15,6 +15,8 @@ window.getJSON = function ( url ) {
 			var xhr = new XMLHttpRequest();
 			xhr.onload = function () {
 				fulfil( JSON.parse( xhr.responseText ) );
+				// do not cache results
+				delete ( promises[ url ] )
 				};
 			xhr.open( 'GET', url );
 			xhr.send();
@@ -89,8 +91,10 @@ ractive = new Ractive({
 		return val.toFixed( 1 ) + '%';
     },
 	datefmt: function (val){
-		var d=new Date(val);
-		return (d.toLocaleString());
+		if (typeof(val) != 'undefined'){
+			var d=new Date(val);
+			return (d.toLocaleString());
+		}
 	}
   }
 });
