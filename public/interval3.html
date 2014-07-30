@@ -47,6 +47,11 @@
             <span>{{ format(max, sensorType) }}</span>
           </div>
 
+		   <!-- average low temperature -->
+          <div class='bar-outer low {{ (avg >= 0) ? "positive" : "negative" }}' style='height: {{ scale(avg, sensorType) }}%;'>
+            <div class='bar-inner' style='background-color: {{ getColor(avg) }};'></div>
+            <span>{{ format(avg, sensorType) }}</span>
+          </div>
 
           <!-- average low temperature -->
           <div class='bar-outer low {{ (min >= 0) ? "positive" : "negative" }}' style='height: {{ scale(min, sensorType) }}%;'>
