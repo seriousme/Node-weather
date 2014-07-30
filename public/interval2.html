@@ -22,7 +22,7 @@
     <!-- switch between temp and humid -->
     <div class='radio-group'>
       <label>°C <input type='radio' name='{{sensorType}}' value='temp' checked></label>
-      <label>%Humid <input type='radio' name='{{sensorType}}' value='humid'></label>
+      <label>%Luchtv. <input type='radio' name='{{sensorType}}' value='humid'></label>
     </div>
 
     <!-- dropdown menu -->
@@ -36,9 +36,9 @@
   
   <!-- the chart -->
   <div class='bar-chart'>
-    {{#selectedRange}}
+    {{#data.month}}
       
-      <!-- 24 sections, one for hour -->
+      <!-- all sections, one for each day -->
       {{#items:i}}
         <div class='bar-group' style='width: {{ 100 / items.length }}%;'>
           
@@ -55,22 +55,22 @@
             <span>{{ format(min, sensorType) }}</span>
           </div>
 
-          <!-- month label (JFMAMJJASOND) -->
+          <!-- label -->
           <span class='month-label'>{{ labels[i] }}</span>
         </div>
       {{/items}}
-    {{/selectedRange}}
+    {{/data.month}}
 
     <!-- horizontal line representing freezing -->
     <div class='axis'></div>
   </div>
-
+  <div class="footer">
+	Laatste wijziging: {{datefmt(data.lastUpdate)}}
+  </div>
 
 </script>
 
 <script src='js/Ractive.min.js'></script>
-<script src='js/jsonDateParse.js'></script>
-
 <script src='js/interval2.js'></script>
 </body>
 </html>

@@ -22,7 +22,7 @@
     <!-- switch between temp and humid -->
     <div class='radio-group'>
       <label>°C <input type='radio' name='{{sensorType}}' value='temp' checked></label>
-      <label>%Humid <input type='radio' name='{{sensorType}}' value='humid'></label>
+      <label>%Luchtv. <input type='radio' name='{{sensorType}}' value='humid'></label>
     </div>
 
     <!-- dropdown menu -->
@@ -36,7 +36,7 @@
   
   <!-- the chart -->
   <div class='bar-chart'>
-    {{#selectedRange}}
+    {{#data.year}}
       
       <!-- 24 sections, one for hour -->
       {{#items:i}}
@@ -59,12 +59,14 @@
           <span class='month-label'>{{ labels[i] }}</span>
         </div>
       {{/items}}
-    {{/selectedRange}}
+    {{/data.year}}
 
     <!-- horizontal line representing freezing -->
     <div class='axis'></div>
   </div>
-
+  <div class="footer">
+	Laatste wijziging: {{datefmt(data.lastUpdate)}}
+  </div>
 
 </script>
 
