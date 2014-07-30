@@ -1,4 +1,1 @@
-
-<!-- saved from url=(0041)http://raspiw:5984/weatherdb/_design/data -->
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></head><body><pre style="word-wrap: break-word; white-space: pre-wrap;">{"_id":"_design/data","_rev":"2-1ffe4eaa4790005cab20c028d9072173","language":"javascript","views":{"byhour":{"map":"function(doc) {\n  var d=new Date(doc.date)\n  if ((doc.id)&amp;&amp; (doc.id != doc.sensorid)){\n  \temit([doc.id,'temp',d.getUTCFullYear(),d.getUTCMonth()+1,d.getUTCDate(),d.getUTCHours()], doc.temp);\n  \temit([doc.id,'humid',d.getUTCFullYear(),d.getUTCMonth()+1,d.getUTCDate(),d.getUTCHours()], doc.humid);\n\t}\n}","reduce":"_stats"}}}
-</pre></body></html>
+{"_id":"_design/data","_rev":"2-1ffe4eaa4790005cab20c028d9072173","language":"javascript","views":{"byhour":{"map":"function(doc) {\n  var d=new Date(doc.date)\n  if ((doc.id)&& (doc.id != doc.sensorid)){\n  \temit([doc.id,'temp',d.getUTCFullYear(),d.getUTCMonth()+1,d.getUTCDate(),d.getUTCHours()], doc.temp);\n  \temit([doc.id,'humid',d.getUTCFullYear(),d.getUTCMonth()+1,d.getUTCDate(),d.getUTCHours()], doc.humid);\n\t}\n}","reduce":"_stats"}}}
