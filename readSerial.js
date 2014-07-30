@@ -53,11 +53,12 @@ function startSerial(){
 		  var data=msg.split(' ');
 		  if (data[0]==='IT+')  {
 			var id=data[2];
+			var name=id;
 			if (typeof(sensors[id])=='undefined'){
 				sensors[id]={};
 			}
 			else{
-				id=sensors[id].name;
+				name=sensors[id].name;
 			}
 			if (typeof(sensors[id].nextTime)=='undefined'){
 				sensors[id].nextTime=0;
@@ -69,8 +70,8 @@ function startSerial(){
 				if (data[7] != 'L')
 					data[7]='ok';
 				var record={ date: datestr,
-				   id: id,
-				   sensorid: data[2],
+				   id: name,
+				   sensorid: id,
 				   temp: Number(data[4]) ,
 				   humid: Number(data[6]),
 				   batt: data[7],
