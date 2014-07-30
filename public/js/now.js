@@ -7,9 +7,9 @@ var sensorTypes={temp:0,humid:1};
 //var dbUrl= 'http://'+location.hostname+':5984/weatherdb/_design/data/_view/byhour';
 var dbUrl= 'http://raspiw:5984/weatherdb/_design/data/_view/byhour';
 
-
+// provide our own getJSON to avoid needing jQuery
 var promises = {};
-window.getJSON = function ( url ) {
+function getJSON ( url ) {
 	if ( !promises[ url ] ) {
 		promises[ url ] = new Ractive.Promise( function ( fulfil ) {
 			var xhr = new XMLHttpRequest();
@@ -57,10 +57,7 @@ function getCurrentSensorData(id,type){
 			sensorData[id][type].min= min;
 			sensorData[id][type].max= max;
 			sensorData[id][type].avg= avg;
-			if (( id == currentSensor) && (type== currentType)){
-				ractive.set( { data: sensorData[ currentSensor ][currentType] });
-			}
-			
+			ractive.update()		
 	});
 	// and the exact last one
 	query=dbUrl+'?reduce=false&descending=true&limit=1&startkey='+ JSON.stringify(endparams);
@@ -68,9 +65,7 @@ function getCurrentSensorData(id,type){
 			if (data.rows.length > 0) {
 				sensorData[id][type].current=data.rows[0].value;
 				sensorData[id][type].lastUpdate=data.rows[0].id;
-				if (( id == currentSensor) && (type== currentType)){
-					ractive.set( { data: sensorData[ currentSensor ][currentType] });
-				}
+				ractive.update()
 			}
 			
 	});
@@ -78,26 +73,7 @@ function getCurrentSensorData(id,type){
 }
 	
 
-ractive = new Ractive({
-  el: output,
-  template: '#template',
-  data: {
-    format: function ( val, valueType ) {
-	  if (typeof(val) != 'undefined')
-		val=Number(val);
-      if ( valueType === 'temp' ) 
-        return val.toFixed( 1 ) + '°';
-	  else
-		return val.toFixed( 1 ) + '%';
-    },
-	datefmt: function (val){
-		if (typeof(val) != 'undefined'){
-			var d=new Date(val);
-			return (d.toLocaleString());
-		}
-	}
-  }
-});
+
 
 function updateData(){
 	getJSON(dbUrl+ '?group_level=1' ).then( function ( data ) {
@@ -130,9 +106,30 @@ function updateData(){
 	});
 }
 
+// initialize ractive
+ractive = new Ractive({
+  el: output,
+  template: '#template',
+  data: {
+    format: function ( val, valueType ) {
+	  if (typeof(val) != 'undefined')
+		val=Number(val);
+      if ( valueType === 'temp' ) 
+        return val.toFixed( 1 ) + '°';
+	  else
+		return val.toFixed( 1 ) + '%';
+    },
+	datefmt: function (val){
+		if (typeof(val) != 'undefined'){
+			var d=new Date(val);
+			return (d.toLocaleString());
+		}
+	}
+  }
+});
 
 
-// when the user makes a selection from the drop-down, update the chart
+// when the user makes a selection from the drop-down, update the data
 ractive.observe( 'selected', function ( value ) {
 	currentSensor=value;
 	if (typeof(sensorData[currentSensor])!='undefined'){
