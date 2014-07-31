@@ -16,6 +16,7 @@ var comPort='/dev/ttyUSB0';
 //var comPort='COM5';
 
 var sensors={};
+var settings={};
 
 // var sensors={ 
 	// 'F8':{ name:'Buiten' },
@@ -24,14 +25,28 @@ var sensors={};
 
 function updateSensors(init){
 	weatherdb.get('config/sensorIDs', function(err, body) {
-	  if (!err)
-		sensors=body.sensorIDs;
-		console.log(sensors);
+	  if (!err){
 		var nowTime=new Date().getTime();
-		sensors.nextTime=nowTime+timeInterval;
+		if (settings._rev != body._rev){
+			sensors=body.sensorIDs;
+			settings._rev = body._rev;
+			console.log(settings,sensors);
+		}
+		else{
+			for (id in sensors){
+				if (typeof(sensors[id].lastSeen) != 'undefined'){
+					if ((nowTime-sensors[id].lastSeen) > expireInterval){
+						delete sensors[id];
+					}
+				}
+			}
+		}
+				
+		settings.nextTime=nowTime+timeInterval;
 		if (init){
 			startSerial();
 		}
+	  }
 	});
 }
 
@@ -102,6 +117,8 @@ function startSerial(){
 				// avoid garbled reception to enter the database
 				sensors[id]={};
 				sensors[id].nextTime=nowTime+1;
+				sensors[id].temps=[];
+				sensors[id].humids=[];
 			}
 			else{
 				// known sensor
@@ -115,6 +132,7 @@ function startSerial(){
 			// retain the values in cache to look for outliers
 			sensors[id].temps.push(temp);
 			sensors[id].humids.push(humid);
+			sensors[id].lastSeen=nowTime;
 			
 
 			if (nowTime >= sensors[id].nextTime){
@@ -142,10 +160,9 @@ function startSerial(){
 			}
 		}
 		// try to update the sensor ID's in the same interval
-		if (nowTime >= sensors.nextTime){
+		if (nowTime >= settings.nextTime){
 			updateSensors(false);
-		}
-			
+		}			
 		});
 	};
 	
