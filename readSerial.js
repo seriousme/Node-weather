@@ -3,6 +3,9 @@
      
 // log once every five minutes
 var timeInterval=5000*60*1;
+// expire unnamed sensors we haven't seen for an hour
+var expireInterval=60000*60*1;
+
 var config=require("./config.json");
      
 var nano = require('nano')(config.writer)
@@ -33,6 +36,41 @@ function updateSensors(init){
 }
 
 
+function checkOutlier(data,x,maxDistance){
+	if (data.length < 3) return false; // need at least 3 values
+	var total=0;
+	for(var i in data) { 
+		total += data[i]; 
+	}
+	var avg=total/data.length;
+	//console.log(data,avg,x,maxDistance);
+	
+	// weed out the extremes
+	var total=0;
+	for(var i in data) { 
+		if (Math.abs(data[i]-avg) > maxDistance){
+			//console.log("outlier",data[i]);
+			data.splice(i,1);
+		}
+		else{
+			total +=data[i]; 
+		}
+	}
+	avg=total/data.length;
+	if (Math.abs(x-avg) > maxDistance){
+		//console.log(data,avg,x,maxDistance);
+		return(false);
+	}
+	// everything ok, wait for new data to accumulate
+	data.splice(0,data.length);
+	return true;
+}
+	
+	
+function valuesOk(sensor,temp,humid){
+	return( checkOutlier(sensor.temps,temp,5) &&
+		checkOutlier(sensor.humids,humid,20));
+}
 
 function startSerial(){
 		var serialPort = new com.SerialPort(comPort, {
@@ -47,48 +85,63 @@ function startSerial(){
 		serialPort.on('data', function(msg) {
 		  var now=new Date();
 		  var nowTime=now.getTime();
-		  
+		  var datestr=now.toJSON();
 		  //console.log(datestr,msg);
 		  // IT+ ID: F0 Temp: 14.8 Humidity: 84 RawData: 9F 05 48
 		  var data=msg.split(' ');
 		  if (data[0]==='IT+')  {
 			var id=data[2];
 			var name=id;
+			var temp=Number(data[4]);
+			var humid=Number(data[6]);
+			var batt=data[7];
+			if (batt != 'L')
+						batt='ok';
 			if (typeof(sensors[id])=='undefined'){
+				// for new unknown sensors we want to see them at least twice to 
+				// avoid garbled reception to enter the database
 				sensors[id]={};
+				sensors[id].nextTime=nowTime+1;
 			}
 			else{
+				// known sensor
 				name=sensors[id].name;
-			}
-			if (typeof(sensors[id].nextTime)=='undefined'){
-				sensors[id].nextTime=0;
-			}
+				if (typeof(sensors[id].nextTime)=='undefined'){
+					sensors[id].nextTime=0;
+					sensors[id].temps=[];
+					sensors[id].humids=[];
+				}
+			}	
+			// retain the values in cache to look for outliers
+			sensors[id].temps.push(temp);
+			sensors[id].humids.push(humid);
 			
+
 			if (nowTime >= sensors[id].nextTime){
-				var datestr=now.toJSON();
-		  		console.log(datestr,msg);
-				if (data[7] != 'L')
-					data[7]='ok';
-				var record={ date: datestr,
-				   id: name,
-				   sensorid: id,
-				   temp: Number(data[4]) ,
-				   humid: Number(data[6]),
-				   batt: data[7],
-				   msg: msg
-				};
-				sensors[id].nextTime=nowTime+timeInterval;
-				weatherdb.insert(record, datestr, function(err, body, header) {
-			  		if (err) {
-						console.log('[weatherdb.insert] ', err.message);
-						return;
-			  		}
-			  		//console.log('you have inserted')
-			  		//console.log(body);
-				});
+				if (valuesOk(sensors[id],temp,humid)){
+					console.log(datestr,msg);
+					var record={ date: datestr,
+					   id: name,
+					   sensorid: id,
+					   temp: temp ,
+					   humid: humid,
+					   batt: batt,
+					   msg: msg
+					};
+					weatherdb.insert(record, datestr, function(err, body, header) {
+						if (err) {
+							console.log('[weatherdb.insert] ', err.message);
+							return;
+						}
+						//console.log('you have inserted')
+						//console.log(body);
+					});
+					// and update the interval
+					sensors[id].nextTime=nowTime+timeInterval;
+				}
 			}
-		  }
-		  // try to update the sensor ID's in the same interval
+		}
+		// try to update the sensor ID's in the same interval
 		if (nowTime >= sensors.nextTime){
 			updateSensors(false);
 		}
