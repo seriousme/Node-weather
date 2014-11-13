@@ -4,9 +4,12 @@ var sensorIds=[];
 var currentSensor;
 var currentType='temp';
 var defaultSensor='Buiten';
+var monthLabels=['J','F','M','A','M','J','J','A','S','O','N','D'];
+
 var sensorTypes={temp:0,humid:1};
 //var dbUrl= 'http://'+location.hostname+':5984/weatherdb/_design/data/_view/byhour';
 var dbUrl= 'http://raspiw:5984/weatherdb/_design/data/_view/byhour';
+
 
 // provide our own getJSON to avoid needing jQuery
 var promises = {};
@@ -32,46 +35,45 @@ function getQueryStringValue (key) {
 }  
 
 // load our data
-function getMonthSensorData(id,type){
-    var startDate,endDate,endParams;
+function getYearSensorData(id,type){
+	var startDate,endDate,endParams;
 	var lastRecord=[id, type,{}]
 	
 	// check for a query date e.g: http://localhost:8080/interval.html?date=2014-11-11
 	var datestr=getQueryStringValue("date")
+	
 	if (datestr != "") {
 		endDate=new Date(datestr)
 		startDate=new Date(endDate)
-		sensorData[id][type].date=(startDate.getMonth()+1)+'-'+startDate.getFullYear()
-		// get end of month
-		endDate.setMonth(endDate.getMonth()+1)
+		sensorData[id][type].date=startDate.getFullYear()
+		// get end of year
+		endDate.setFullYear(endDate.getFullYear()+1)
 		endDate.setMinutes(endDate.getMinutes()-1)
 		endParams=[id, type, endDate.getUTCFullYear(),endDate.getUTCMonth()+1,endDate.getUTCDate(),endDate.getUTCHours()]
 		
 	}
 	else {
 		startDate=new Date();
-		// go back 1 month
-		startDate.setMonth(startDate.getMonth()-1)
-		endParams=lastRecord;
+		// go back to the start
+		startDate.setFullYear(2000)
+		endParams=lastRecord
 	}
-	
 	
 	// compensate for month starting at 0
 	var startParams=[id, type, startDate.getUTCFullYear(),startDate.getUTCMonth()+1,startDate.getUTCDate(),startDate.getUTCHours()];
+	// get all data
+	var query=dbUrl+'?group_level=3&startkey='+ JSON.stringify(startParams)+'&endkey='+JSON.stringify(endParams);
 	
-	// get the daily data
-	var query=dbUrl+'?group_level=5&startkey='+ JSON.stringify(startParams)+'&endkey='+JSON.stringify(endParams);
 	getJSON(query).then( function ( data ) {
-			
-			sensorData[id][type].month={ items:[],labels:[]};
-			var items=sensorData[id][type].month.items;
-			var labels=sensorData[id][type].month.labels;
+			sensorData[id][type].all={ items:[],labels:[]};
+			var items=sensorData[id][type].all.items;
+			var labels=sensorData[id][type].all.labels;
 			for (var idx in data.rows){
 				var row= data.rows[idx];
-				// compensate for month starting at 0
-				var d=  new Date(Date.UTC(row.key[2],row.key[3]-1,row.key[4]));
-				labels.push(d.getDate())
-				
+				console.log(JSON.stringify(row.key[2]))
+				var d=  new Date(Date.UTC(row.key[2],0));
+				console.log(JSON.stringify(d))
+				labels.push(d.getFullYear())
 				// calculate average
 				var avg= row.value.sum/row.value.count;
 				avg=Number(avg.toFixed( 1 ));
@@ -84,6 +86,7 @@ function getMonthSensorData(id,type){
 				
 				
 			}
+			console.log(JSON.stringify(sensorData))
 			ractive.update();
 			
 	});
@@ -108,7 +111,7 @@ function updateData(){
 			}
 			for (var type in sensorTypes){
 				sensorData[id][type]={};
-				getMonthSensorData(id,type);
+				getYearSensorData(id,type);
 			}
 		}
 		if (typeof(currentSensor)=='undefined'){
@@ -161,7 +164,7 @@ ractive = new Ractive({
       return 'rgb(' + r + ',' + g + ',' + b + ')';
     },
 	drillDown: function (val) {
-		return('location.href="interval.html?date='+val+'"')
+		return('location.href="interval3.html?date='+val+'"')
 	}
   }
 });

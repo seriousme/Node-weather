@@ -2,6 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8">
+<script src="http://code.jquery.com/jquery-latest.js"></script>
 <link rel="stylesheet" type="text/css" href="styles/style.css">
 <title>Weerstation</title>
 </head>
@@ -21,13 +22,12 @@
     <!-- switch between temp and humid -->
     <div class='radio-group'>
       <label>°C <input type='radio' name='{{sensorType}}' value='temp' checked></label>
-      <label>%Luchtv. <input type='radio' name='{{sensorType}}' value='humid'></label>
+      <label>%Humid <input type='radio' name='{{sensorType}}' value='humid'></label>
     </div>
   </div>
-
-  {{#data:i}}
+  {{#sensorData}}
   <div class='panel'>
-	<h2>{{name}} </h2>
+	<h2>{{name}}</h2>
 	<div class="summary">
 	<p>Maximum: {{format(max, sensorType)}}</p>
 	<p>Gemiddeld: {{format(avg, sensorType)}}</p>
@@ -35,11 +35,13 @@
 	</div>
 	<div class="valueText">{{format(current, sensorType)}}</div>
   </div>
-  {{/data}}
+  {{#sensorData}}
   
 </script>
 
 <script src='js/Ractive.min.js'></script>
+<script src='js/jsonDateParse.js'></script>
+
 <script src='js/nowBoth.js'></script>
 </body>
 </html>

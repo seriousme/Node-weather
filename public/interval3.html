@@ -39,7 +39,7 @@
       
       <!-- 24 sections, one for hour -->
       {{#items:i}}
-        <div class='bar-group' style='width: {{ 100 / items.length }}%;'>
+        <div class='bar-group' style='width: {{ 100 / items.length }}%;' onClick="{{drillDown(date)}}">
           
           <!-- average high temperature -->
           <div class='bar-outer high {{ (max >= 0) ? "positive" : "negative" }}' style='height: {{ scale(max, sensorType) }}%;'>
@@ -71,6 +71,16 @@
   <div class="footer">
 	Laatste wijziging: {{datefmt(data.lastUpdate)}}
   </div>
+  <div class="menu">
+        [<a href="index.html">nu</a>]
+        [<a href="interval.html">dag</a>]
+        [<a href="interval2.html">maand</a>]
+        [jaar]
+		[<a href="interval4.html">alles</a>]
+  </div>
+  <div class="dateLabel">
+	{{data.date}}
+   </div>
 
 </script>
 

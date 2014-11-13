@@ -35,9 +35,9 @@
   
   <!-- the chart -->
   <div class='bar-chart'>
-    {{#data.month}}
+    {{#data.all}}
       
-      <!-- all sections, one for each day -->
+      <!-- 24 sections, one for hour -->
       {{#items:i}}
         <div class='bar-group' style='width: {{ 100 / items.length }}%;' onClick="{{drillDown(date)}}">
           
@@ -47,6 +47,11 @@
             <span>{{ format(max, sensorType) }}</span>
           </div>
 
+		   <!-- average low temperature -->
+          <div class='bar-outer low {{ (avg >= 0) ? "positive" : "negative" }}' style='height: {{ scale(avg, sensorType) }}%;'>
+            <div class='bar-inner' style='background-color: {{ getColor(avg) }};'></div>
+            <span>{{ format(avg, sensorType) }}</span>
+          </div>
 
           <!-- average low temperature -->
           <div class='bar-outer low {{ (min >= 0) ? "positive" : "negative" }}' style='height: {{ scale(min, sensorType) }}%;'>
@@ -54,11 +59,11 @@
             <span>{{ format(min, sensorType) }}</span>
           </div>
 
-          <!-- label -->
+          <!-- month label (JFMAMJJASOND) -->
           <span class='month-label'>{{ labels[i] }}</span>
         </div>
       {{/items}}
-    {{/data.month}}
+    {{/data.all}}
 
     <!-- horizontal line representing freezing -->
     <div class='axis'></div>
@@ -69,16 +74,17 @@
   <div class="menu">
         [<a href="index.html">nu</a>]
         [<a href="interval.html">dag</a>]
-        [maand]
+        [<a href="interval2.html">maand</a>]
         [<a href="interval3.html">jaar</a>]
+		[Alles]
   </div>
   <div class="dateLabel">
 	{{data.date}}
- </div>
+   </div>
 
 </script>
 
 <script src='js/Ractive.min.js'></script>
-<script src='js/interval2.js'></script>
+<script src='js/interval4.js'></script>
 </body>
 </html>

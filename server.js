@@ -2,7 +2,7 @@ var port = 8080;
 var staticSite = __dirname + '/public';
 
 // start the serial reader in the same process
-require('./readSerial');
+//require('./readSerial');
 
 var express = require('express');
 var app = express();

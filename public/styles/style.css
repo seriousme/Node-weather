@@ -196,3 +196,18 @@
 	bottom: 0px;
 	right: 20px;
 }
+
+.menu {
+	font-family: 'Helvetica Neue', Arial;
+	font-size: 0.7em;
+	position: absolute;
+	bottom: 0px;
+	left: 20px;
+}
+.dateLabel {
+	font-family: 'Helvetica Neue', Arial;
+	font-size: 0.7em;
+	position: absolute;
+	bottom: 0px;
+	left: 350px;
+}

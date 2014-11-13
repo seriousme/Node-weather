@@ -57,9 +57,19 @@
     <div class='axis'></div>
   </div>
 
-	<div class="footer">
+ <div class="footer">
 	Laatste wijziging: {{datefmt(data.lastUpdate)}}
-	</div>
+ </div>
+ <div class="menu">
+        [<a href="index.html">nu</a>]
+        [dag]
+        [<a href="interval2.html">maand</a>]
+        [<a href="interval3.html">jaar</a>]
+  </div>
+ <div class="dateLabel">
+	{{data.date}}
+ </div>
+
 </script>
 
 <script src='js/Ractive.min.js'></script>

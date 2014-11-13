@@ -26,18 +26,40 @@ function getJSON ( url ) {
 	return promises[ url ];
 };
 
+// provide a method to pickup QueryString values
+function getQueryStringValue (key) {  
+  return unescape(window.location.search.replace(new RegExp("^(?:.*[&\\?]" + escape(key).replace(/[\.\+\*]/g, "\\$&") + "(?:\\=([^&]*))?)?.*$", "i"), "$1"));  
+}  
+
 // load our data
 function getDaySensorData(id,type){
-	//var d=new Date(2014,6,20,16);
-	var d=new Date();
-	// go back 1 day
-	d.setDate(d.getDate()-1)
+	var endDate,endParams;
+	var lastRecord=[id, type,{}]
+	
+	// check for a query date e.g: http://localhost:8080/interval.html?date=2014-11-11
+	var datestr=getQueryStringValue("date")
+	if (datestr != "") {
+		endDate=new Date(datestr)
+		startDate=new Date(endDate)
+		sensorData[id][type].date=endDate.toLocaleDateString()
+		// get end of day
+		endDate.setDate(endDate.getDate()+1)
+		endDate.setMinutes(endDate.getMinutes()-1)
+		endParams=[id, type, endDate.getUTCFullYear(),endDate.getUTCMonth()+1,endDate.getUTCDate(),endDate.getUTCHours()]
+		
+	}
+	else {
+		startDate=new Date();
+		// go back 1 day
+		startDate.setDate(startDate.getDate()-1)
+		endParams=lastRecord;
+	}
+	
 	// compensate for month starting at 0
-	var startparams=[id, type, d.getUTCFullYear(),d.getUTCMonth()+1,d.getUTCDate(),d.getUTCHours()];
-	var endparams=[id, type,{}];
+	var startParams=[id, type, startDate.getUTCFullYear(),startDate.getUTCMonth()+1,startDate.getUTCDate(),startDate.getUTCHours()];
 	
 	// get the hourly data
-	var query=dbUrl+'?group_level=6&startkey='+ JSON.stringify(startparams)+'&endkey='+JSON.stringify(endparams);
+	var query=dbUrl+'?group_level=6&startkey='+ JSON.stringify(startParams)+'&endkey='+JSON.stringify(endParams);
 	getJSON(query).then( function ( data ) {
 			
 			sensorData[id][type].day={ items:[],labels:[]};
@@ -45,24 +67,25 @@ function getDaySensorData(id,type){
 			var labels=sensorData[id][type].day.labels;
 			for (var idx in data.rows){
 				var row= data.rows[idx];
+				// compensate for month starting at 0
+				var d=  new Date(Date.UTC(row.key[2],row.key[3]-1,row.key[4],row.key[5]));
+				labels.push(d.getHours())
 				// calculate average
 				var avg= row.value.sum/row.value.count;
 				avg=Number(avg.toFixed( 1 ));
 				items.push({
 					avg: avg,
 					min: row.value.min,
-					max: row.value.max
+					max: row.value.max,
+					date: d.toJSON()
 				});
-				// compensate for month starting at 0
-				var d=  new Date(Date.UTC(row.key[2],row.key[3]-1,row.key[4],row.key[5]));
-				labels.push(d.getHours())
 				
 			}
 			ractive.update();
 			
 	});
 	// and the exact last one
-	query=dbUrl+'?reduce=false&descending=true&limit=1&startkey='+ JSON.stringify(endparams);
+	query=dbUrl+'?reduce=false&descending=true&limit=1&startkey='+ JSON.stringify(lastRecord);
 	getJSON(query).then( function ( data ) {
 			if (data.rows.length > 0) {
 				sensorData[id][type].lastUpdate=data.rows[0].id;
