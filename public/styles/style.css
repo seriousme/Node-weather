@@ -79,7 +79,7 @@
 	text-align: center;
 }
 
-.month-label {
+.axis-label {
 	position: absolute;
 	bottom: -2em;
 	left: 0;
@@ -204,7 +204,7 @@
 	bottom: 0px;
 	left: 20px;
 }
-.dateLabel {
+.date-label {
 	font-family: 'Helvetica Neue', Arial;
 	font-size: 0.7em;
 	position: absolute;

@@ -41,12 +41,13 @@
       {{#items:i}}
         <div class='bar-group' style='width: {{ 100 / items.length }}%;' onClick="{{drill(date)}}">
           
+		  {{#if current.screen.maximum }}
           <!-- maximum temperature -->
           <div class='bar-outer high {{ (max >= 0) ? "positive" : "negative" }}' style='height: {{ scale(max, sensorType) }}%;'>
             <div class='bar-inner' style='background-color: {{ getColor(max) }};'></div>
             <span>{{ format(max, sensorType) }}</span>
           </div>
-		
+		  {{/if}}
 
 		  {{#if current.screen.average }}
 		   <!-- average temperature -->
@@ -65,7 +66,7 @@
 		  {{/if}}
 
           <!-- axis label -->
-          <span class='month-label'>{{ labels[i] }}</span>
+          <span class='axis-label'>{{ labels[i] }}</span>
         </div>
       {{/items}}
     {{/data.chart}}
@@ -99,7 +100,7 @@
 		{{/if}}
 	 {{/menu}}
   </div>
-  <div class="dateLabel">
+  <div class="date-label">
 	{{data.date}}
    </div>
 
