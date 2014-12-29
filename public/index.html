@@ -31,6 +31,51 @@
       {{/sensors}}
     </select>
   </div>
+  
+  {{#if current.screen.chart }}
+  <!-- the chart -->
+  <div class='bar-chart'>
+    {{#data.chart}}
+      
+      <!-- 24 sections, one for hour -->
+      {{#items:i}}
+        <div class='bar-group' style='width: {{ 100 / items.length }}%;' onClick="{{drill(date)}}">
+          
+          <!-- maximum temperature -->
+          <div class='bar-outer high {{ (max >= 0) ? "positive" : "negative" }}' style='height: {{ scale(max, sensorType) }}%;'>
+            <div class='bar-inner' style='background-color: {{ getColor(max) }};'></div>
+            <span>{{ format(max, sensorType) }}</span>
+          </div>
+		
+
+		  {{#if current.screen.average }}
+		   <!-- average temperature -->
+          <div class='bar-outer low {{ (avg >= 0) ? "positive" : "negative" }}' style='height: {{ scale(avg, sensorType) }}%;'>
+            <div class='bar-inner' style='background-color: {{ getColor(avg) }};'></div>
+            <span>{{ format(avg, sensorType) }}</span>
+          </div>
+		  {{/if}}
+
+		  {{#if current.screen.minimum }}
+          <!-- minimum temperature -->
+          <div class='bar-outer low {{ (min >= 0) ? "positive" : "negative" }}' style='height: {{ scale(min, sensorType) }}%;'>
+            <div class='bar-inner' style='background-color: {{ getColor(min) }};'></div>
+            <span>{{ format(min, sensorType) }}</span>
+          </div>
+		  {{/if}}
+
+          <!-- axis label -->
+          <span class='month-label'>{{ labels[i] }}</span>
+        </div>
+      {{/items}}
+    {{/data.chart}}
+
+    <!-- horizontal line representing freezing -->
+    <div class='axis'></div>
+  </div>
+  
+  {{else}}
+  <!-- the panel -->
   <div class='panel'>
 	<div class="summary">
 	<p>Maximum: {{format(data.max, sensorType)}}</p>
@@ -39,16 +84,25 @@
 	</div>
 	<div class="valueText">{{format(data.current, sensorType)}}</div>
   </div>
+  
+  
+  {{/if}}
   <div class="footer">
 	Laatste wijziging: {{datefmt(data.lastUpdate)}}
   </div>
   <div class="menu">
-	[nu]
-	[<a href="interval.html">dag</a>]
-	[<a href="interval2.html">maand</a>]
-	[<a href="interval3.html">jaar</a>]
+	{{#screens.items}}
+		{{#if ( link == current.screen.link) }}
+			[{{ item }}]
+		{{else}}
+			[<a href="javascript:setScreen('{{link}}')">{{item}} </a>]
+		{{/if}}
+	 {{/menu}}
   </div>
-  
+  <div class="dateLabel">
+	{{data.date}}
+   </div>
+
 </script>
 
 <script src='js/Ractive.min.js'></script>

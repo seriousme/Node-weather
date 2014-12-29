@@ -24,6 +24,7 @@ var settings={};
 // };
 
 function updateSensors(init){
+	// console.log('before update:', JSON.stringify(sensors));
 	weatherdb.get('config/sensorIDs', function(err, body) {
 	  if (!err){
 		var nowTime=new Date().getTime();
@@ -47,7 +48,9 @@ function updateSensors(init){
 			startSerial();
 		}
 	  }
+	// console.log('after update:', JSON.stringify(sensors));
 	});
+
 }
 
 
@@ -101,7 +104,7 @@ function startSerial(){
 		  var now=new Date();
 		  var nowTime=now.getTime();
 		  var datestr=now.toJSON();
-		  //console.log(datestr,msg);
+		  // console.log(datestr,msg);
 		  // IT+ ID: F0 Temp: 14.8 Humidity: 84 RawData: 9F 05 48
 		  var data=msg.split(' ');
 		  if (data[0]==='IT+')  {
@@ -119,6 +122,7 @@ function startSerial(){
 				sensors[id].nextTime=nowTime+1;
 				sensors[id].temps=[];
 				sensors[id].humids=[];
+				//console.log('new sensor',id )
 			}
 			else{
 				// known sensor
@@ -133,10 +137,13 @@ function startSerial(){
 			sensors[id].temps.push(temp);
 			sensors[id].humids.push(humid);
 			sensors[id].lastSeen=nowTime;
+			// console.log('updated cache for ',id,JSON.stringify(sensors[id]))
 			
 
 			if (nowTime >= sensors[id].nextTime){
+				// console.log('checking valuesOk for',id)
 				if (valuesOk(sensors[id],temp,humid)){
+				//	console.log('succes: valuesOk for',id)
 					console.log(datestr,msg);
 					var record={ date: datestr,
 					   id: name,
@@ -151,7 +158,7 @@ function startSerial(){
 							console.log('[weatherdb.insert] ', err.message);
 							return;
 						}
-						//console.log('you have inserted')
+						// console.log('you have inserted a record for sensor ', id)
 						//console.log(body);
 					});
 					// and update the interval
