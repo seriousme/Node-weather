@@ -1,8 +1,8 @@
-var config = require("./config.json");
-var nano = require('nano')(config.writer);
-var weatherdb = nano.use('weatherdb');
+const config = require("./config.json");
+const nano = require('nano')(config.writer);
+const weatherdb = nano.use('weatherdb');
 
-var bulk = {
+const bulk = {
 	docs : []
 };
 
@@ -15,8 +15,13 @@ var sensors={};
 
 function bulkUpdate() {
 	weatherdb.bulk( bulk, function (err, body) {
-		console.log(err, body);
-	})
+		if (!err){
+			console.log("update complete");
+		}
+		else{
+			console.log(err, body);
+		}
+	});
 }
 
 function processRecords(err, body){
@@ -24,7 +29,7 @@ function processRecords(err, body){
 			console.log("rows to analyse:", body.total_rows);
 			body.rows.forEach(function (row) {
 				if (sensors[row.doc.sensorid]){
-					row.doc.id= sensors[row.doc.sensorid].name
+					row.doc.id= sensors[row.doc.sensorid].name;
 					bulk.docs.push(row.doc);
 				}
 			});

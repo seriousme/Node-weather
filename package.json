@@ -1,0 +1,30 @@
+{
+  "name": "node-weather",
+  "version": "1.0.0",
+  "description": "Weather logger",
+  "main": "server.js",
+  "dependencies": {
+    "express": "^4.14.0",
+    "nano": "^6.2.0",
+    "serialport": "^4.0.7"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/seriousme/Node-weather.git"
+  },
+  "keywords": [
+    "node",
+    "weather"
+  ],
+  "author": "Hans Klunder",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/seriousme/Node-weather/issues"
+  },
+  "homepage": "https://github.com/seriousme/Node-weather#readme"
+}
