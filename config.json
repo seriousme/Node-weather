@@ -1,0 +1,2 @@
+{ "reader": "http://localhost:5984",
+  "writer": "http://user:password@localhost:5984" }
