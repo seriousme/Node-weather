@@ -1,14 +1,10 @@
-var port = 8080;
-var staticSite = __dirname + '/public';
+var port = 8080
+var staticSite = __dirname + '/public'
 
 // start the serial reader in the same process
-require('./readSerial');
+require('./readSerial')
 
-var express = require('express');
-var app = express();
-app.use('/', express.static(staticSite));
-app.listen(port, function() { console.log('listening')});
-
-
-
-
+var express = require('express')
+var app = express()
+app.use('/', express.static(staticSite))
+app.listen(port, function () { console.log('listening')})
