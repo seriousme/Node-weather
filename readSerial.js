@@ -101,7 +101,7 @@ function saveData(record) {
 
 function idFromSensorId(sensorid) {
   if (typeof sensors[sensorid] == "undefined") {
-    sensors[id] = { name: sensorid };
+    sensors[sensorid] = { name: sensorid };
   }
   var sensor = sensors[sensorid];
   if (typeof sensor.nextTime == "undefined") {
