@@ -5,7 +5,7 @@
   "main": "server.js",
   "dependencies": {
     "express": "^4.14.0",
-    "nano": "^6.2.0",
+    "nano": "^8.1.0",
     "serialport": "^4.0.7"
   },
   "devDependencies": {},
