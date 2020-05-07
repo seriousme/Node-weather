@@ -43,7 +43,7 @@
   let interval;
 
   function zoom(evt) {
-    loadData(evt.detail.zoom, sensor, sensorTypeSwitch, evt.detail.date);
+    updateData(evt.detail.zoom, sensor, sensorTypeSwitch, evt.detail.date);
   }
 
   async function updateData(screenId, sensorId, type, date) {
