@@ -8,27 +8,27 @@
     {
       label: "dag",
       id: "day",
-      chartCfg: { minimum: false, average: true, maximum: false }
+      chartCfg: { minimum: false, average: true, maximum: false },
     },
     {
       label: "maand",
       id: "month",
-      chartCfg: { minimum: true, average: false, maximum: true, zoom: "day" }
+      chartCfg: { minimum: true, average: false, maximum: true, zoom: "day" },
     },
     {
       label: "jaar",
       id: "year",
-      chartCfg: { minimum: true, average: true, maximum: true, zoom: "month" }
+      chartCfg: { minimum: true, average: true, maximum: true, zoom: "month" },
     },
     {
       label: "alles",
       id: "all",
-      chartCfg: { minimum: true, average: true, maximum: true, zoom: "year" }
-    }
+      chartCfg: { minimum: true, average: true, maximum: true, zoom: "year" },
+    },
   ];
 
   let screenIdx = {};
-  screens.forEach(scr => (screenIdx[scr.id] = scr));
+  screens.forEach((scr) => (screenIdx[scr.id] = scr));
 
   let sensors = [];
   let sensor = "";
@@ -98,7 +98,7 @@
   // setup reactivity
   $: updateData(currentScreen, sensor, sensorTypeSwitch, currentDate);
   // start the show
-  wDB.getSensors().then(res => {
+  wDB.getSensors().then((res) => {
     sensors = res;
     sensor = sensors[0];
   });
@@ -160,11 +160,13 @@
     <div>
       <h2>Weerstation</h2>
       <!-- dropdown menu -->
-      <select bind:value={sensor}>
-        {#each sensors as name}
-          <option value={name}>{name}</option>
-        {/each}
-      </select>
+      {#if sensor}
+        <select bind:value={sensor}>
+          {#each sensors as name}
+            <option value={name}>{name}</option>
+          {/each}
+        </select>
+      {/if}
     </div>
     <!-- switch between temp and humid -->
     <div class="radio-group">
@@ -179,12 +181,13 @@
     </div>
 
   </div>
-
-  <!-- main panel goes here -->
-  {#if chartCfg}
-    <Chart {sensorType} {chartCfg} {data} on:zoom={zoom} />
-  {:else}
-    <Panel {sensorType} {...data} />
+  {#if sensor}
+    <!-- main panel goes here -->
+    {#if chartCfg}
+      <Chart {sensorType} {chartCfg} {data} on:zoom={zoom} />
+    {:else}
+      <Panel {sensorType} {...data} />
+    {/if}
   {/if}
 
   <div class="footer">
