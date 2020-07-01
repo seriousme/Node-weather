@@ -4,9 +4,9 @@
   "description": "Weather logger",
   "main": "server.js",
   "dependencies": {
-    "express": "^4.14.0",
-    "nano": "^8.1.0",
-    "serialport": "^4.0.7"
+    "express": "^4.17.1",
+    "nano": "^8.2.2",
+    "serialport": "^9.0.0"
   },
   "devDependencies": {},
   "scripts": {
