@@ -13,7 +13,8 @@ const config = require("./config.json");
 const nano = require("nano")(config.writer);
 const weatherdb = nano.use("weatherdb");
 
-const serialPort = require("serialport");
+const SerialPort = require("serialport");
+const Readline = require('@serialport/parser-readline')
 const comPort = "/dev/ttyUSB0";
 
 var sensors = {};
@@ -158,11 +159,9 @@ function processMsg(msg) {
 
 // start listening to the serialPort
 function startSerial() {
-  const port = new serialPort(comPort, {
-    baudrate: 57600,
-    parser: serialPort.parsers.readline("\r\n")
-  });
-  port.on("data", processMsg);
+  const port = new SerialPort(comPort);
+  const parser = port.pipe(new Readline({ delimiter: '\r\n' }));
+  parser.on('data', processMsg);
 }
 
 // this is where it all starts
