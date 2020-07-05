@@ -1,5 +1,5 @@
 // const fetch = require('node-fetch');
-const dbUrl = 'http://raspiw:5984/weatherdb/_design/data/_view/byhour';
+const dbUrl = 'http://orangepi2:5984/weatherdb/_design/data/_view/byhour';
 var monthLabels = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D']
 
 async function getWeatherData(params) {
