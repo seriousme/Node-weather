@@ -22,7 +22,7 @@ var settings = {};
 
 function readSensorsFromDb(init) {
   // console.log('before update:', JSON.stringify(sensors))
-  weatherdb.get("config/sensorIDs", function(err, body) {
+  weatherdb.get("config/sensorIDs", function (err, body) {
     if (!err) {
       const nowTime = new Date().getTime();
       if (settings._rev != body._rev) {
@@ -53,8 +53,8 @@ function readSensorsFromDb(init) {
 }
 
 // helper function to sum an Array
-Array.prototype.sum = function() {
-  return this.reduce(function(a, b) {
+Array.prototype.sum = function () {
+  return this.reduce(function (a, b) {
     return a + b;
   });
 };
@@ -92,7 +92,7 @@ function valuesOk(sensor, temp, humid) {
 // store data in database
 function saveData(record) {
   console.log(record.date, record.msg);
-  weatherdb.insert(record, record.date, function(err, body, header) {
+  weatherdb.insert(record, record.date, function (err, body, header) {
     if (err) {
       console.log("[weatherdb.insert] ", err.message);
       return;
@@ -159,7 +159,7 @@ function processMsg(msg) {
 
 // start listening to the serialPort
 function startSerial() {
-  const port = new SerialPort(comPort);
+  const port = new SerialPort(comPort, { baudRate: 57600 });
   const parser = port.pipe(new Readline({ delimiter: '\r\n' }));
   parser.on('data', processMsg);
 }
