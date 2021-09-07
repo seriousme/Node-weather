@@ -6,8 +6,8 @@
   "dependencies": {
     "@serialport/parser-readline": "^9.0.7",
     "express": "^4.17.1",
-    "nano": "^9.0.3",
-    "serialport": "^9.2.0"
+    "nano": "^9.0.4",
+    "serialport": "^9.2.1"
   },
   "devDependencies": {},
   "scripts": {
