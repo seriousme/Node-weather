@@ -41,7 +41,7 @@ function processRow(row) {
 }
 
 weatherdb.list({
-    'start_key': "2019-11-14T19:00:00.000Z",
+    'start_key': "2021-12-11T17:50:00.000Z",
     'include_docs': true
 }).then(body => {
     console.log('number of rows:', body.total_rows)
