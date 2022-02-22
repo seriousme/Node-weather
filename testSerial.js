@@ -9,3 +9,5 @@ function startSerial() {
     parser.on('data', console.log);
     console.log("started reading on", comPort);
 }
+
+startSerial();
