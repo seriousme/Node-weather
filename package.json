@@ -4,10 +4,10 @@
   "description": "Weather logger",
   "main": "server.js",
   "dependencies": {
-    "@serialport/parser-readline": "^10.3.0",
-    "express": "^4.18.1",
-    "nano": "^10.0.0",
-    "serialport": "^10.4.0"
+    "@serialport/parser-readline": "^10.5.0",
+    "express": "^4.18.2",
+    "nano": "^10.1.2",
+    "serialport": "^10.5.0"
   },
   "devDependencies": {},
   "scripts": {
