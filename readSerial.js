@@ -26,7 +26,7 @@ function readSensorsFromDb(init) {
   weatherdb.get("config/sensorIDs", function (err, body) {
     if (!err) {
       const nowTime = new Date().getTime();
-      if (settings._rev != body._rev) {
+      if (settings._rev !== body._rev) {
         // we got an update from the DB
         sensors = body.sensorIDs;
         settings._rev = body._rev;
@@ -35,10 +35,10 @@ function readSensorsFromDb(init) {
         // no new data in sensor table, check if we need to expire unknown sensors
         for (var id in sensors) {
           if (
-            typeof sensors[id].lastSeen != "undefined" &&
+            typeof sensors[id].lastSeen !== "undefined" &&
             nowTime - sensors[id].lastSeen > expireInterval
           ) {
-            delete sensors[id];
+            sensors[id] = undefined;
           }
         }
       }
@@ -102,11 +102,11 @@ function saveData(record) {
 }
 
 function idFromSensorId(sensorid) {
-  if (typeof sensors[sensorid] == "undefined") {
+  if (typeof sensors[sensorid] === "undefined") {
     sensors[sensorid] = { name: sensorid };
   }
   var sensor = sensors[sensorid];
-  if (typeof sensor.nextTime == "undefined") {
+  if (typeof sensor.nextTime === "undefined") {
     // setup the sensor data structure
     sensor.nextTime = 0;
     sensor.temps = [];
@@ -131,7 +131,7 @@ function processMsg(msg) {
       sensorid: data[2],
       temp: Number(data[4]),
       humid: Number(data[6]),
-      batt: data[7] == "L" ? data[7] : "ok",
+      batt: data[7] === "L" ? data[7] : "ok",
       msg: msg
     };
     const sensor = sensors[record.sensorid];
