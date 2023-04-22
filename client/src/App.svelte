@@ -104,6 +104,63 @@
   });
 </script>
 
+<main>
+  <!-- header and options -->
+  <div class="header">
+    <div>
+      <h2>Weerstation</h2>
+      <!-- dropdown menu -->
+      {#if sensor}
+        <select bind:value={sensor}>
+          {#each sensors as name}
+            <option value={name}>{name}</option>
+          {/each}
+        </select>
+      {/if}
+    </div>
+    <!-- switch between temp and humid -->
+    <div class="radio-group">
+      <label>
+        °C
+        <input type="radio" bind:group={sensorTypeSwitch} value={"temp"} />
+      </label>
+      <label>
+        %Luchtv.
+        <input type="radio" bind:group={sensorTypeSwitch} value={"humid"} />
+      </label>
+    </div>
+  </div>
+  {#if sensor}
+    <!-- main panel goes here -->
+    {#if chartCfg}
+      <Chart {sensorType} {chartCfg} {data} on:zoom={zoom} />
+    {:else}
+      <Panel {sensorType} {...data} />
+    {/if}
+  {/if}
+
+  <div class="footer">
+    <div>
+      {#each screens as screen}
+        {#if screen.id == currentScreen}
+          [{screen.label}]
+        {:else}
+          [
+          <a
+            href="#{screen.id}"
+            on:click|preventDefault={() => (currentScreen = screen.id)}
+          >
+            {screen.label}
+          </a>
+          ]
+        {/if}
+      {/each}
+    </div>
+    <div>{label}</div>
+    <div>Laatste wijziging: {lastUpdate.toLocaleString()}</div>
+  </div>
+</main>
+
 <style>
   main {
     display: flex;
@@ -153,60 +210,3 @@
     font-size: 0.7em;
   }
 </style>
-
-<main>
-  <!-- header and options -->
-  <div class="header">
-    <div>
-      <h2>Weerstation</h2>
-      <!-- dropdown menu -->
-      {#if sensor}
-        <select bind:value={sensor}>
-          {#each sensors as name}
-            <option value={name}>{name}</option>
-          {/each}
-        </select>
-      {/if}
-    </div>
-    <!-- switch between temp and humid -->
-    <div class="radio-group">
-      <label>
-        °C
-        <input type="radio" bind:group={sensorTypeSwitch} value={'temp'} />
-      </label>
-      <label>
-        %Luchtv.
-        <input type="radio" bind:group={sensorTypeSwitch} value={'humid'} />
-      </label>
-    </div>
-
-  </div>
-  {#if sensor}
-    <!-- main panel goes here -->
-    {#if chartCfg}
-      <Chart {sensorType} {chartCfg} {data} on:zoom={zoom} />
-    {:else}
-      <Panel {sensorType} {...data} />
-    {/if}
-  {/if}
-
-  <div class="footer">
-    <div>
-      {#each screens as screen}
-        {#if screen.id == currentScreen}
-          [{screen.label}]
-        {:else}
-          [
-          <a
-            href="#{screen.id}"
-            on:click|preventDefault={() => (currentScreen = screen.id)}>
-            {screen.label}
-          </a>
-          ]
-        {/if}
-      {/each}
-    </div>
-    <div>{label}</div>
-    <div>Laatste wijziging: {lastUpdate.toLocaleString()}</div>
-  </div>
-</main>
