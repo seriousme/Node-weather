@@ -1,6 +1,6 @@
 // const fetch = require('node-fetch');
 const dbUrlObject = new URL(window.location);
-dbUrlObject.port = 5498;
+dbUrlObject.port = 5984;
 dbUrlObject.pathname = "/weatherdb/_design/data/_view/byhour";
 const dbUrl = dbUrlObject.href;
 const monthLabels = [
