@@ -9,7 +9,6 @@
   "devDependencies": {
     "@rollup/plugin-commonjs": "22.0.1",
     "@rollup/plugin-node-resolve": "^13.3.0",
-    "node-fetch": "^3.2.10",
     "rollup": "^2.77.2",
     "rollup-plugin-css-only": "^3.1.0",
     "rollup-plugin-livereload": "^2.0.5",
