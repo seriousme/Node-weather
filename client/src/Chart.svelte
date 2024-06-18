@@ -144,10 +144,11 @@
   <div class="bar-chart" >
     <!-- 24 sections, one for hour -->
     {#each data as item}
-      <div
+      <div role="button" tabindex=0
         class="bar-group {chartCfg.zoom?'clickable':''}"
         style="width: {100 / data.length}%;"
-        on:click={zoomHandler(item.date)}>
+        on:click={zoomHandler(item.date)}
+        on:keydown={zoomHandler(item.date)}>
 
         {#if chartCfg.maximum}
           <!-- maximum temperature -->
