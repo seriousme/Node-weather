@@ -1,5 +1,5 @@
-const dbUrlObject = new URL(window.location);
-dbUrlObject.port = 5984;
+const dbUrlObject = new URL(window.location.href);
+dbUrlObject.port = "5984";
 dbUrlObject.pathname = "/weatherdb/_design/data/_view/byhour";
 const dbUrl = dbUrlObject.href;
 const monthLabels = [
@@ -46,7 +46,7 @@ function dateFromArray(arr) {
 	if (arr.length > 1) {
 		arr[1] -= 1;
 	}
-	return new Date(Date.UTC(...arr));
+	return new Date(Date.UTC(arr));
 }
 
 async function getSensors() {
@@ -90,8 +90,8 @@ async function getCurrentSensorData(sensorid, type) {
 			};
 		},
 		{
-			min: Infinity,
-			max: -Infinity,
+			min: Number.POSITIVE_INFINITY,
+			max: Number.NEGATIVE_INFINITY,
 			count: 0,
 			sum: 0,
 		},
@@ -126,14 +126,25 @@ async function getChartData(id, type, group_level, date) {
 	return items;
 }
 
-// hourly data for a day
-async function getDaySensorData(id, type, date) {
-	if (typeof date !== "object") {
-		date = new Date();
-		// go back 1 day
-		date.setDate(date.getDate() - 1);
+function makeDate(sourceDate,type){
+	if (typeof sourceDate === "object") {
+		return sourceDate;
 	}
+	const date= new Date();
+	if (type === "day"){
+		return date.setDate(date.getDate() - 1);
+	}
+	if (type === "month"){
+		return date.setMonth(date.getMonth() - 1);
+	}
+	if (type === "year"){
+		return date.setFullYear(date.getFullYear() - 1);
+	}
+}
 
+// hourly data for a day
+async function getDaySensorData(id, type, sourceDate) {
+	const date = makeDate(sourceDate,"day");
 	const data = await getChartData(id, type, 6, date);
 	const result = data.map((item) => {
 		item.label = item.date.getHours();
@@ -142,13 +153,8 @@ async function getDaySensorData(id, type, date) {
 	return result;
 }
 
-async function getMonthSensorData(id, type, date) {
-	if (typeof date !== "object") {
-		date = new Date();
-		// go back 1 month
-		date.setMonth(startDate.getMonth() - 1);
-	}
-
+async function getMonthSensorData(id, type, sourceDate) {
+	const date = makeDate(sourceDate,"month");
 	const data = await getChartData(id, type, 5, date);
 	const result = data.map((item) => {
 		item.label = item.date.getDate();
@@ -157,13 +163,8 @@ async function getMonthSensorData(id, type, date) {
 	return result;
 }
 
-async function getYearSensorData(id, type, date) {
-	if (typeof date !== "object") {
-		date = new Date();
-		// go back 1 year
-		date.setFullYear(startDate.getFullYear() - 1);
-	}
-
+async function getYearSensorData(id, type, sourceDate) {
+	const date = makeDate(sourceDate,"year");
 	const data = await getChartData(id, type, 4, date);
 	const result = data.map((item) => {
 		item.label = monthLabels[item.date.getMonth()];
@@ -186,7 +187,7 @@ async function getAllSensorData(id, type) {
 async function getLastUpdates() {
 	const type = "temp";
 	const sensors = await getSensors();
-	result = Promise.all(
+	const result = Promise.all(
 		sensors.map(async (sensor) => {
 			const last = await getLastUpdate(sensor, type);
 			return {
