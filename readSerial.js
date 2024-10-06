@@ -8,13 +8,14 @@ const expireInterval = 60000 * 60 * 1;
 const maxTempDistance = 5;
 const maxHumidDistance = 5;
 
-const config = require("./config.json");
+import { ConfigJson } from "./lib/config.js";
 
-const nano = require("nano")(config.writer);
+import Nano from "nano";
+const nano = Nano(ConfigJson.writer);
 const weatherdb = nano.use("weatherdb");
 
-const { SerialPort } = require("serialport");
-const { ReadlineParser } = require("@serialport/parser-readline");
+import { SerialPort } from "serialport";
+import { ReadlineParser } from "@serialport/parser-readline";
 const path = "/dev/ttyUSB0";
 const baudRate = 57600;
 
@@ -23,7 +24,7 @@ const settings = {};
 
 function readSensorsFromDb(init) {
 	// console.log('before update:', JSON.stringify(sensors))
-	weatherdb.get("config/sensorIDs", function (err, body) {
+	weatherdb.get("config/sensorIDs", (err, body) => {
 		if (!err) {
 			const nowTime = new Date().getTime();
 			if (settings._rev !== body._rev) {
@@ -55,9 +56,7 @@ function readSensorsFromDb(init) {
 
 // helper function to sum an Array
 Array.prototype.sum = function () {
-	return this.reduce(function (a, b) {
-		return a + b;
-	});
+	return this.reduce((a, b) => a + b);
 };
 
 // filter outliers from sensor data
@@ -93,7 +92,7 @@ function valuesOk(sensor, temp, humid) {
 // store data in database
 function saveData(record) {
 	console.log(record.date, record.msg);
-	weatherdb.insert(record, record.date, function (err, body, header) {
+	weatherdb.insert(record, record.date, (err, body, header) => {
 		if (err) {
 			console.log("[weatherdb.insert] ", err.message);
 			return;
@@ -165,5 +164,7 @@ function startSerial() {
 	parser.on("data", processMsg);
 }
 
-// this is where it all starts
-readSensorsFromDb(true);
+export function startSerialReader() {
+	// this is where it all starts
+	readSensorsFromDb(true);
+}

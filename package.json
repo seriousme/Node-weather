@@ -2,6 +2,7 @@
   "name": "node-weather",
   "version": "1.0.0",
   "description": "Weather logger",
+  "type": "module",
   "main": "server.js",
   "dependencies": {
     "@serialport/parser-readline": "^12.0.0",

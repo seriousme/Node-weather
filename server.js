@@ -1,12 +1,14 @@
-var port = 8080;
-var staticSite = __dirname + "/client/dist";
+const port = 8080;
+const localFile = (file) => new URL(file, import.meta.url).pathname;
+const staticSite = localFile("./client/dist");
 
 // start the serial reader in the same process
-require("./readSerial");
+import { startSerialReader } from "./readSerial.js";
+startSerialReader(true);
 
-var express = require("express");
-var app = express();
+import Express from "express";
+const app = Express();
 app.use("/", express.static(staticSite));
-app.listen(port, function () {
+app.listen(port, () => {
 	console.log("listening");
 });
