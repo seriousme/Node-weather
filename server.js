@@ -1,5 +1,5 @@
 var port = 8080;
-var staticSite = __dirname + "/client/public";
+var staticSite = __dirname + "/client/dist";
 
 // start the serial reader in the same process
 require("./readSerial");
