@@ -46,7 +46,7 @@ function dateFromArray(arr) {
 	if (arr.length > 1) {
 		arr[1] -= 1;
 	}
-	return new Date(Date.UTC(arr));
+	return new Date(Date.UTC.apply(null,arr));
 }
 
 async function getSensors() {
