@@ -8,7 +8,7 @@ startSerialReader(true);
 
 import Express from "express";
 const app = Express();
-app.use("/", express.static(staticSite));
+app.use("/", Express.static(staticSite));
 app.listen(port, () => {
 	console.log("listening");
 });
