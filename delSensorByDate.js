@@ -1,36 +1,35 @@
 // usage node delSensorbyDate.js 98
-const config = require("./config.json");
-const nano = require("nano")(config.writer);
-const weatherdb = nano.use("weatherdb");
+import { openDB } from "./lib/database.js";
+const weatherdb = openDB();
 
 const bulk = {
 	docs: [],
 };
 
-var sensor, force;
-force = false;
-
-if (process.argv.length > 2) {
+function parseArgs() {
 	if (process.argv.length > 3) {
-		force = process.argv[3] == "-force";
-		sensor = process.argv[2];
-	} else {
-		if (process.argv[2] == "-force") {
-			force = true;
-		} else {
-			sensor = process.argv[2];
-		}
+		return { force: process.argv[3] === "-force", sensor: process.argv[2] };
 	}
+	if (process.argv.length > 2) {
+		if (process.argv[2] === "-force") {
+			return { force: true };
+		}
+		return {
+			force: false,
+			sensor: process.argv[2],
+		};
+	}
+	return {};
 }
 
 function bulkDelete() {
-	weatherdb.bulk(bulk, function (err, body) {
+	weatherdb.bulk(bulk, (err, body) => {
 		console.log(err, body);
 	});
 }
 
 function processRow(row) {
-	if (typeof sensor != "string" || row.doc.sensorid == sensor) {
+	if (typeof sensor !== "string" || row.doc.sensorid === sensor) {
 		console.log(row.doc);
 		bulk.docs.push({
 			_id: row.doc._id,
@@ -40,6 +39,7 @@ function processRow(row) {
 	}
 }
 
+const { force, sensor } = parseArgs();
 weatherdb
 	.list({
 		start_key: "2021-12-11T17:50:00.000Z",

@@ -6,14 +6,13 @@ const bulk = {
 	docs: [],
 };
 
-var sensors = {};
-// var sensors={
+// let sensors={
 // 'F8':{ name:'Buiten' },
 // '6C':{ name:'Kas' }
 // }
 
 function bulkUpdate() {
-	weatherdb.bulk(bulk, function (err, body) {
+	weatherdb.bulk(bulk, (err, body) => {
 		if (!err) {
 			console.log("update complete");
 		} else {
@@ -22,30 +21,32 @@ function bulkUpdate() {
 	});
 }
 
-function processRecords(err, body) {
-	if (!err) {
-		console.log("rows to analyse:", body.total_rows);
-		body.rows.forEach(function (row) {
-			if (sensors[row.doc.sensorid]) {
-				row.doc.id = sensors[row.doc.sensorid].name;
-				bulk.docs.push(row.doc);
+function doProcess(sensors) {
+	return function processRecords(err, body) {
+		if (!err) {
+			console.log("rows to analyse:", body.total_rows);
+			for (const row of body.rows) {
+				if (sensors[row.doc.sensorid]) {
+					row.doc.id = sensors[row.doc.sensorid].name;
+					bulk.docs.push(row.doc);
+				}
 			}
-		});
-		console.log("rows to fix:", bulk.docs.length);
-		if (process.argv[2] == "-force") {
-			bulkUpdate();
+			console.log("rows to fix:", bulk.docs.length);
+			if (process.argv[2] === "-force") {
+				bulkUpdate();
+			} else {
+				console.log("use: -force to update records");
+				// console.log(JSON.stringify(bulk.docs,null," "))
+			}
 		} else {
-			console.log("use: -force to update records");
-			// console.log(JSON.stringify(bulk.docs,null," "))
+			console.log("error getting view:", err.reason);
 		}
-	} else {
-		console.log("error getting view:", err.reason);
-	}
+	};
 }
 
-weatherdb.get("config/sensorIDs", function (err, body) {
+weatherdb.get("config/sensorIDs", (err, body) => {
 	if (!err) {
-		sensors = body.sensorIDs;
+		const sensors = body.sensorIDs;
 		console.log("fetched sensorID's");
 		weatherdb.view(
 			"data",
@@ -54,7 +55,7 @@ weatherdb.get("config/sensorIDs", function (err, body) {
 				reduce: false,
 				include_docs: true,
 			},
-			processRecords,
+			doProcess(sensors),
 		);
 	} else {
 		console.log("err:", err.reason);

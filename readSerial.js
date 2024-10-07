@@ -8,11 +8,8 @@ const expireInterval = 60000 * 60 * 1;
 const maxTempDistance = 5;
 const maxHumidDistance = 5;
 
-import { ConfigJson } from "./lib/config.js";
-
-import Nano from "nano";
-const nano = Nano(ConfigJson.writer);
-const weatherdb = nano.use("weatherdb");
+import { openDB } from "./lib/database.js";
+const weatherdb = openDB();
 
 import { SerialPort } from "serialport";
 import { ReadlineParser } from "@serialport/parser-readline";

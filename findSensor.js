@@ -1,26 +1,23 @@
-var config = require("./config.json");
-var nano = require("nano")(config.writer);
-var weatherdb = nano.use("weatherdb");
+import { openDB } from "./lib/database.js";
+const weatherdb = openDB();
 
-var sensors = {};
-
-// var sensors={
+// const sensors={
 // 'F8':{ name:'Buiten' },
 // '6C':{ name:'Kas' }
 // }
-var newSensors = {};
-var sindex = {};
-var configRec = {};
-var minCount = 5; // need at least 5 valid measurements
+const newSensors = {};
+const sindex = {};
+const configRec = {};
+const minCount = 5; // need at least 5 valid measurements
 
 function processSensorData(err, body) {
 	if (!err) {
-		if (body.rows.length == 2) {
-			var sensor0id = body.rows[0].key[0];
-			var sensor1id = body.rows[1].key[0];
-			var sensor0 = body.rows[0].value;
-			var sensor1 = body.rows[1].value;
-			var found = false;
+		if (body.rows.length === 2) {
+			const sensor0id = body.rows[0].key[0];
+			const sensor1id = body.rows[1].key[0];
+			const sensor0 = body.rows[0].value;
+			const sensor1 = body.rows[1].value;
+			let found = false;
 			console.log(
 				"Sensor",
 				sensor0id,
@@ -44,14 +41,14 @@ function processSensorData(err, body) {
 			if (sensor0.max > sensor1.max && sensor0.min > sensor1.min) {
 				// sensor0='Kas'
 				found = true;
-				newSensors[sensor0id] = sindex["Kas"];
-				newSensors[sensor1id] = sindex["Buiten"];
+				newSensors[sensor0id] = sindex.Kas;
+				newSensors[sensor1id] = sindex.Buiten;
 			}
 			if (sensor0.max < sensor1.max && sensor0.min < sensor1.min) {
 				// sensor1='Kas'
 				found = true;
-				newSensors[sensor1id] = sindex["Kas"];
-				newSensors[sensor0id] = sindex["Buiten"];
+				newSensors[sensor1id] = sindex.Kas;
+				newSensors[sensor0id] = sindex.Buiten;
 			}
 			if (sensor0.count <= minCount || sensor1.count <= minCount) {
 				found = false;
@@ -62,7 +59,7 @@ function processSensorData(err, body) {
 				// console.log("after",JSON.stringify(newSensors))
 				configRec.sensorIDs = newSensors;
 				// console.log(configBody)
-				weatherdb.insert(configRec, function (err, body) {
+				weatherdb.insert(configRec, (err, body) => {
 					if (err) console.log("err: config update failed", err);
 				});
 			} else {
@@ -79,13 +76,13 @@ function processSensorData(err, body) {
 	}
 }
 
-weatherdb.get("config/sensorIDs", function (err, body) {
+weatherdb.get("config/sensorIDs", (err, body) => {
 	if (!err) {
 		// console.log(body)
-		configRec = body;
-		sensors = configRec.sensorIDs;
+		const configRec = body;
+		const sensors = configRec.sensorIDs;
 		// create an index
-		for (var key in sensors) {
+		for (const key in sensors) {
 			sindex[sensors[key].name] = sensors[key];
 		}
 		// console.log("before",JSON.stringify(sensors))
