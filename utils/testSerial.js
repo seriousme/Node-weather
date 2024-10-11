@@ -1,5 +1,5 @@
-const { SerialPort } = require("serialport");
-const { ReadlineParser } = require("@serialport/parser-readline");
+import { SerialPort } from "serialport";
+import { ReadlineParser } from "@serialport/parser-readline";
 const path = "/dev/ttyUSB0";
 const baudRate = 57600;
 

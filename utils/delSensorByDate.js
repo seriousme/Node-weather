@@ -1,5 +1,5 @@
-// usage node delsensor.js F3 -force
-import { openDB } from "./lib/database.js";
+// usage node delSensorbyDate.js 98
+import { openDB } from "../lib/database.js";
 const weatherdb = openDB();
 
 const bulk = {
@@ -30,6 +30,7 @@ function bulkDelete() {
 
 function processRow(row) {
 	if (typeof sensor !== "string" || row.doc.sensorid === sensor) {
+		console.log(row.doc);
 		bulk.docs.push({
 			_id: row.doc._id,
 			_rev: row.doc._rev,
@@ -38,27 +39,21 @@ function processRow(row) {
 	}
 }
 
-const { force, sensor} = parseArgs();
-weatherdb.view(
-	"data",
-	"unknownSensors",
-	{
-		reduce: false,
+const { force, sensor } = parseArgs();
+weatherdb
+	.list({
+		start_key: "2021-12-11T17:50:00.000Z",
 		include_docs: true,
-	},
-	(err, body) => {
-		if (!err) {
-			console.log("Total number of unknown sensors:", body.total_rows);
-			body.rows.forEach(processRow);
-			console.log("rows to delete:", bulk.docs.length);
-			if (force) {
-				console.log("starting delete");
-				bulkDelete();
-			} else {
-				console.log("use: -force to delete records");
-			}
+	})
+	.then((body) => {
+		console.log("number of rows:", body.total_rows);
+		body.rows.forEach(processRow);
+		console.log("rows to delete:", bulk.docs.length);
+		if (force) {
+			console.log("starting delete");
+			bulkDelete();
 		} else {
-			console.log("err:", err.reason);
+			console.log("use: -force to delete records");
 		}
-	},
-);
+	})
+	.catch((err) => console.log("err:", err.reason));

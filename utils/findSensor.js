@@ -1,4 +1,4 @@
-import { openDB } from "./lib/database.js";
+import { openDB } from "../lib/database.js";
 const weatherdb = openDB();
 
 // const sensors={
