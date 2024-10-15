@@ -6,7 +6,7 @@
   "main": "server.js",
   "dependencies": {
     "@serialport/parser-readline": "^12.0.0",
-    "express": "^4.21.0",
+    "express": "^4.21.1",
     "nano": "^10.1.4",
     "serialport": "^12.0.0"
   },
