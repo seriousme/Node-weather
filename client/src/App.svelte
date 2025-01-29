@@ -42,16 +42,13 @@
   let chartCfg;
   let interval;
 
-  function zoom(evt) {
-    updateData(evt.detail.zoom, sensor, sensorTypeSwitch, evt.detail.date);
-  }
-
-  async function updateData(screenId, sensorId, type, date) {
-    console.log({ screenId, sensorId, type });
+  async function updateData(screenId, sensorId, type, nowDate) {
+    console.log({ screenId, sensorId, type, nowDate });
     // avoid any automatic refresh while we are busy
     if (interval) {
       clearInterval(interval);
     }
+    let date = nowDate;
     if (screenId && sensor && type) {
       const recent = await wDB.getLastUpdate(sensorId, type);
       switch (screenId) {
@@ -95,8 +92,12 @@
     }
   }
 
+  function zoom(screenId, sensorId, type, nowDate){
+    updateData(screenId, sensorId, type, nowDate);
+  }
+
   // setup reactivity
-  $: updateData(currentScreen, sensor, sensorTypeSwitch, currentDate);
+  updateData(currentScreen, sensor, sensorTypeSwitch, currentDate);
   // start the show
   wDB.getSensors().then((res) => {
     sensors = res;
