@@ -1,6 +1,4 @@
 <script>
-  import { createEventDispatcher } from "svelte";
-
   export let sensorType = "temp";
   export let chartCfg = {
     minimum: true,
@@ -8,14 +6,13 @@
     maximum: true
   };
   export let data = [];
+  export let zoom;
   $: units = sensorType === "temp" ? "°" : "%";
   $: scaling = sensorType === "temp" ? 2 : 0.5;
 
   const scale = val => Math.abs(scaling * val);
   const minmax = c => Math.max(0, Math.min(255, Math.floor(2.56 * c)));
   const getColor = val => `rgb(${minmax(50 + val)},100,${minmax(50 - val)})`;
-  const dispatch = createEventDispatcher();
-  const zoomHandler = date => () => dispatch("zoom", { date,zoom:chartCfg.zoom });
   
 </script>
 
@@ -147,17 +144,17 @@
       <div role="button" tabindex=0
         class="bar-group {chartCfg.zoom?'clickable':''}"
         style="width: {100 / data.length}%;"
-        on:click={zoomHandler(item.date)}
-        on:keydown={zoomHandler(item.date)}>
+        on:click={zoom(item.date)}
+        on:keydown={zoom(item.date)}>
 
         {#if chartCfg.maximum}
           <!-- maximum temperature -->
           <div
             class="bar-outer high {item.max >= 0 ? 'positive' : 'negative'}"
-            style="height: {scale(item.max, sensorType)}%;">
+            style="height: {scale(item.max)}%;">
             <div
               class="bar-inner"
-              style="background-color: {getColor(item.max)};" />
+              style="background-color: {getColor(item.max)};"></div>
             <span>{item.max + units}</span>
           </div>
         {/if}
@@ -166,10 +163,10 @@
           <!-- average temperature -->
           <div
             class="bar-outer low {item.avg >= 0 ? 'positive' : 'negative'}"
-            style="height: {scale(item.avg, sensorType)}%;">
+            style="height: {scale(item.avg)}%;">
             <div
               class="bar-inner"
-              style="background-color: {getColor(item.avg)};" />
+              style="background-color: {getColor(item.avg)};"></div>
             <span>{item.avg + units}</span>
           </div>
         {/if}
@@ -178,10 +175,10 @@
           <!-- minimum temperature -->
           <div
             class="bar-outer low {item.min >= 0 ? 'positive' : 'negative'}"
-            style="height: {scale(item.min, sensorType)}%;">
+            style="height: {scale(item.min)}%;">
             <div
               class="bar-inner"
-              style="background-color: {getColor(item.min)}" />
+              style="background-color: {getColor(item.min)}"></div>
             <span>{item.min + units}</span>
           </div>
         {/if}
@@ -192,6 +189,6 @@
     {/each}
 
     <!-- horizontal line representing freezing -->
-    <div class="axis" />
+    <div class="axis"></div>
   </div>
 </div>

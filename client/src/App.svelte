@@ -133,7 +133,7 @@
   {#if sensor}
     <!-- main panel goes here -->
     {#if chartCfg}
-      <Chart {sensorType} {chartCfg} {data} on:zoom={zoom} />
+      <Chart {sensorType} {chartCfg} {data} {zoom} />
     {:else}
       <Panel {sensorType} {...data} />
     {/if}

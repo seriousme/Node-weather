@@ -23,7 +23,7 @@
 </style>
 
 <div class="panel">
-  <div />
+  <div></div>
   <div class="currentValue">{current+units}</div>
   <div>
     <p>Maximum: {max+units}</p>
