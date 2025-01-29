@@ -97,6 +97,10 @@ function zoom(screenId, sensorId, type, nowDate) {
 	updateData(screenId, sensorId, type, nowDate);
 }
 
+function setScreen(screen){
+  currentScreen=screen;
+  updateData(currentScreen, sensor, sensorTypeSwitch, currentDate);
+}
 // start the show
 async function start() {
 	const res = await wDB.getSensors();
@@ -151,7 +155,7 @@ start();
           [
           <a
             href="#{screen.id}"
-            on:click|preventDefault={() => (currentScreen = screen.id)}
+            on:click|preventDefault={() => (setScreen(screen.id))}
           >
             {screen.label}
           </a>
