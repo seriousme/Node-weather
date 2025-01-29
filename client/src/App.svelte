@@ -93,9 +93,9 @@ async function updateData(screenId, sensorId, type, nowDate) {
 }
 
 function zoom(date) {
-	const zoomScreen = screenIdx[currentScreen];
-	console.log(zoomScreen, sensor, sensorType, date);
-	updateData(zoomScreen, sensor, sensorType, date);
+	currentScreen = screenIdx[currentScreen];
+	console.log("zoom", currentScreen, sensor, sensorType, date);
+	updateData(currentScreen, sensor, sensorType, date);
 }
 
 function setScreen(screen) {
