@@ -92,14 +92,15 @@ async function updateData(screenId, sensorId, type, nowDate) {
 	}
 }
 
-function zoom(screenId, sensorId, type, nowDate) {
-	console.log("zooming", screenId, sensorId, type, nowDate);
-	updateData(screenId, sensorId, type, nowDate);
+function zoom(date) {
+	const zoomScreen = screenIdx[currentScreen];
+	console.log(zoomScreen, sensor, sensorType, date);
+	updateData(zoomScreen, sensor, sensorType, date);
 }
 
-function setScreen(screen){
-  currentScreen=screen;
-  updateData(currentScreen, sensor, sensorTypeSwitch, currentDate);
+function setScreen(screen) {
+	currentScreen = screen;
+	updateData(currentScreen, sensor, sensorTypeSwitch, currentDate);
 }
 // start the show
 async function start() {
