@@ -1,108 +1,108 @@
 <script>
-  import Panel from "./Panel.svelte";
-  import Chart from "./Chart.svelte";
-  import * as wDB from "./weatherDB";
+import Panel from "./Panel.svelte";
+import Chart from "./Chart.svelte";
+import * as wDB from "./weatherDB";
 
-  const screens = [
-    { label: "nu", id: "now" },
-    {
-      label: "dag",
-      id: "day",
-      chartCfg: { minimum: false, average: true, maximum: false },
-    },
-    {
-      label: "maand",
-      id: "month",
-      chartCfg: { minimum: true, average: false, maximum: true, zoom: "day" },
-    },
-    {
-      label: "jaar",
-      id: "year",
-      chartCfg: { minimum: true, average: true, maximum: true, zoom: "month" },
-    },
-    {
-      label: "alles",
-      id: "all",
-      chartCfg: { minimum: true, average: true, maximum: true, zoom: "year" },
-    },
-  ];
+const screens = [
+	{ label: "nu", id: "now" },
+	{
+		label: "dag",
+		id: "day",
+		chartCfg: { minimum: false, average: true, maximum: false },
+	},
+	{
+		label: "maand",
+		id: "month",
+		chartCfg: { minimum: true, average: false, maximum: true, zoom: "day" },
+	},
+	{
+		label: "jaar",
+		id: "year",
+		chartCfg: { minimum: true, average: true, maximum: true, zoom: "month" },
+	},
+	{
+		label: "alles",
+		id: "all",
+		chartCfg: { minimum: true, average: true, maximum: true, zoom: "year" },
+	},
+];
 
-  let screenIdx = {};
-  screens.forEach((scr) => (screenIdx[scr.id] = scr));
+let screenIdx = {};
+screens.forEach((scr) => (screenIdx[scr.id] = scr));
 
-  let sensors = [];
-  let sensor = "";
-  let currentScreen = "now";
-  let currentDate = new Date();
-  let sensorTypeSwitch = "temp";
-  let sensorType = sensorTypeSwitch;
-  let lastUpdate = new Date(Date.UTC(1970));
-  let label = "";
-  let data = {};
-  let chartCfg;
-  let interval;
+let sensors = [];
+let sensor = "";
+let currentScreen = "now";
+let currentDate = new Date();
+let sensorTypeSwitch = "temp";
+let sensorType = sensorTypeSwitch;
+let lastUpdate = new Date(Date.UTC(1970));
+let label = "";
+let data = {};
+let chartCfg;
+let interval;
 
-  async function updateData(screenId, sensorId, type, nowDate) {
-    console.log({ screenId, sensorId, type, nowDate });
-    // avoid any automatic refresh while we are busy
-    if (interval) {
-      clearInterval(interval);
-    }
-    let date = nowDate;
-    if (screenId && sensor && type) {
-      const recent = await wDB.getLastUpdate(sensorId, type);
-      switch (screenId) {
-        case "now":
-          data = await wDB.getCurrentSensorData(sensorId, type);
-          data.current = recent.current;
-          date = new Date();
-          label = "";
-          break;
-        case "day":
-          data = await wDB.getDaySensorData(sensorId, type, date);
-          label = date.toLocaleDateString();
-          break;
-        case "month":
-          data = await wDB.getMonthSensorData(sensorId, type, date);
-          label = `${date.getMonth() + 1}-${date.getFullYear()}`;
-          break;
-        case "year":
-          data = await wDB.getYearSensorData(sensorId, type, date);
-          label = date.getFullYear();
-          break;
-        case "all":
-          data = await wDB.getAllSensorData(sensorId, type);
-          label = "";
-          break;
-        default:
-          break;
-      }
-      currentDate.setTime(date.getTime());
-      currentScreen = screenId;
-      chartCfg = screenIdx[screenId].chartCfg;
-      lastUpdate = recent.lastUpdate;
-      // make switch happen after data has been fetched to avoid
-      // delay between switching symbols and switching data
-      sensorType = sensorTypeSwitch;
-      sensor = sensorId;
-      // and refresh again after 2 mins
-      interval = setInterval(() => {
-        updateData(screenId, sensorId, type, date);
-      }, 120000);
-    }
-  }
+async function updateData(screenId, sensorId, type, nowDate) {
+	console.log({ screenId, sensorId, type, nowDate });
+	// avoid any automatic refresh while we are busy
+	if (interval) {
+		clearInterval(interval);
+	}
+	let date = nowDate;
+	wDB.getSensors().then((res) => {
+		sensors = res;
+		sensor = sensors[0];
+	});
+	if (screenId && sensor && type) {
+		const recent = await wDB.getLastUpdate(sensorId, type);
+		switch (screenId) {
+			case "now":
+				data = await wDB.getCurrentSensorData(sensorId, type);
+				data.current = recent.current;
+				date = new Date();
+				label = "";
+				break;
+			case "day":
+				data = await wDB.getDaySensorData(sensorId, type, date);
+				label = date.toLocaleDateString();
+				break;
+			case "month":
+				data = await wDB.getMonthSensorData(sensorId, type, date);
+				label = `${date.getMonth() + 1}-${date.getFullYear()}`;
+				break;
+			case "year":
+				data = await wDB.getYearSensorData(sensorId, type, date);
+				label = date.getFullYear();
+				break;
+			case "all":
+				data = await wDB.getAllSensorData(sensorId, type);
+				label = "";
+				break;
+			default:
+				break;
+		}
+		currentDate.setTime(date.getTime());
+		currentScreen = screenId;
+		chartCfg = screenIdx[screenId].chartCfg;
+		lastUpdate = recent.lastUpdate;
+		// make switch happen after data has been fetched to avoid
+		// delay between switching symbols and switching data
+		sensorType = sensorTypeSwitch;
+		sensor = sensorId;
+		// and refresh again after 2 mins
+		interval = setInterval(() => {
+			updateData(screenId, sensorId, type, date);
+		}, 120000);
+	}
+}
 
-  function zoom(screenId, sensorId, type, nowDate){
-    updateData(screenId, sensorId, type, nowDate);
-  }
+function zoom(screenId, sensorId, type, nowDate) {
+	updateData(screenId, sensorId, type, nowDate);
+}
 
-  // setup reactivity
-  updateData(currentScreen, sensor, sensorTypeSwitch, currentDate);
-  // start the show
-  wDB.getSensors().then((res) => {
-    sensors = res;
-    sensor = sensors[0];
-  });
+// setup reactivity
+updateData(currentScreen, sensor, sensorTypeSwitch, currentDate);
+// start the show
 </script>
 
 <main>
