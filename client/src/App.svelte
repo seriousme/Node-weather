@@ -93,6 +93,7 @@ async function updateData(screenId, sensorId, type, nowDate) {
 }
 
 function zoom(screenId, sensorId, type, nowDate) {
+	console.log("zooming", screenId, sensorId, type, nowDate);
 	updateData(screenId, sensorId, type, nowDate);
 }
 
