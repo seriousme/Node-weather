@@ -1,10 +1,6 @@
 <script>
-  export let max = 0;
-  export let min = 0;
-  export let current = 0;
-  export let avg = 0;
-  export let sensorType = "temp";
-  $: units= (sensorType === "temp")?"°":"%";
+let { sensorType, max, min, current, avg } = $props;
+$: units = sensorType === "temp" ? "°" : "%";
 </script>
 
 <style>

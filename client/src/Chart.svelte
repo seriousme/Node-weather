@@ -1,19 +1,11 @@
 <script>
-  export let sensorType = "temp";
-  export let chartCfg = {
-    minimum: true,
-    average: true,
-    maximum: true
-  };
-  export let data = [];
-  export let zoom;
-  $: units = sensorType === "temp" ? "°" : "%";
-  $: scaling = sensorType === "temp" ? 2 : 0.5;
+let { sensorType, chartCfg, data, zoom } = $props;
+$: units = sensorType === "temp" ? "°" : "%";
+$: scaling = sensorType === "temp" ? 2 : 0.5;
 
-  const scale = val => Math.abs(scaling * val);
-  const minmax = c => Math.max(0, Math.min(255, Math.floor(2.56 * c)));
-  const getColor = val => `rgb(${minmax(50 + val)},100,${minmax(50 - val)})`;
-  
+const scale = (val) => Math.abs(scaling * val);
+const minmax = (c) => Math.max(0, Math.min(255, Math.floor(2.56 * c)));
+const getColor = (val) => `rgb(${minmax(50 + val)},100,${minmax(50 - val)})`;
 </script>
 
 <style>
