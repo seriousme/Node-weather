@@ -1,7 +1,7 @@
 <script>
-let { sensorType, chartCfg, data, zoom } = $props;
-$: units = sensorType === "temp" ? "°" : "%";
-$: scaling = sensorType === "temp" ? 2 : 0.5;
+let { sensorType, chartCfg, data, zoom } = $props();
+let units = $derived(sensorType === "temp" ? "°" : "%");
+let scaling = $derived(sensorType === "temp" ? 2 : 0.5);
 
 const scale = (val) => Math.abs(scaling * val);
 const minmax = (c) => Math.max(0, Math.min(255, Math.floor(2.56 * c)));
@@ -136,8 +136,8 @@ const getColor = (val) => `rgb(${minmax(50 + val)},100,${minmax(50 - val)})`;
       <div role="button" tabindex=0
         class="bar-group {chartCfg.zoom?'clickable':''}"
         style="width: {100 / data.length}%;"
-        on:click={zoom(item.date)}
-        on:keydown={zoom(item.date)}>
+        onclick={zoom(item.date)}
+        onkeydown={zoom(item.date)}>
 
         {#if chartCfg.maximum}
           <!-- maximum temperature -->
