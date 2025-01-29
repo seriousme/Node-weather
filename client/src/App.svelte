@@ -49,10 +49,6 @@ async function updateData(screenId, sensorId, type, nowDate) {
 		clearInterval(interval);
 	}
 	let date = nowDate;
-	wDB.getSensors().then((res) => {
-		sensors = res;
-		sensor = sensors[0];
-	});
 	if (screenId && sensor && type) {
 		const recent = await wDB.getLastUpdate(sensorId, type);
 		switch (screenId) {
@@ -100,9 +96,14 @@ function zoom(screenId, sensorId, type, nowDate) {
 	updateData(screenId, sensorId, type, nowDate);
 }
 
-// setup reactivity
-updateData(currentScreen, sensor, sensorTypeSwitch, currentDate);
 // start the show
+async function start() {
+	const res = await wDB.getSensors();
+	sensors = res;
+	sensor = sensors[0];
+	updateData(currentScreen, sensor, sensorTypeSwitch, currentDate);
+}
+start();
 </script>
 
 <main>
