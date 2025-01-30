@@ -1,6 +1,6 @@
 <script>
-let { data } = $props();
-let { sensorType, max, min, current, avg }= data;
+let { sensorType, data } = $props();
+let { max, min, current, avg }= data;
 let units = $derived(sensorType === "temp" ? "°" : "%");
 </script>
 
