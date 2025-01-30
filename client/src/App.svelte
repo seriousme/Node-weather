@@ -28,7 +28,9 @@ const screens = [
 ];
 
 let screenIdx = {};
-screens.forEach((scr) => (screenIdx[scr.id] = scr));
+for (const scr of screens) {
+	screenIdx[scr.id] = scr;
+}
 
 let sensors = [];
 let sensor = "";
@@ -92,8 +94,8 @@ async function updateData(screenId, sensorId, type, nowDate) {
 	}
 }
 
-function zoom(date) {
-	currentScreen = screenIdx[currentScreen];
+function zoom(screen, date) {
+	currentScreen = screen;
 	console.log("zoom", currentScreen, sensor, sensorType, date);
 	updateData(currentScreen, sensor, sensorType, date);
 }
@@ -103,13 +105,10 @@ function setScreen(screen) {
 	updateData(currentScreen, sensor, sensorTypeSwitch, currentDate);
 }
 // start the show
-async function start() {
-	const res = await wDB.getSensors();
+wDB.getSensors().then((res) => {
 	sensors = res;
-	sensor = sensors[0];
-	updateData(currentScreen, sensor, sensorTypeSwitch, currentDate);
-}
-start();
+	updateData(currentScreen, sensors[0], sensorTypeSwitch, currentDate);
+});
 </script>
 
 <main>
@@ -143,7 +142,7 @@ start();
     {#if chartCfg}
       <Chart {sensorType} {chartCfg} {data} {zoom} />
     {:else}
-      <Panel {sensorType} {...data} />
+      <Panel {sensorType} {data} />
     {/if}
   {/if}
 
