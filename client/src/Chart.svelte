@@ -136,8 +136,8 @@ const getColor = (val) => `rgb(${minmax(50 + val)},100,${minmax(50 - val)})`;
       <div role="button" tabindex=0
         class="bar-group {chartCfg.zoom?'clickable':''}"
         style="width: {100 / data.length}%;"
-        onclick={zoom(chartCfg.zoom,item.date)}
-        onkeydown={zoom(chartCfg.zoom,item.date)}>
+        onclick={()=>zoom(chartCfg.zoom,item.date)}
+        onkeydown={()=>zoom(chartCfg.zoom,item.date)}>
 
         {#if chartCfg.maximum}
           <!-- maximum temperature -->

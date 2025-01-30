@@ -32,16 +32,16 @@ for (const scr of screens) {
 	screenIdx[scr.id] = scr;
 }
 
-let sensors = [];
-let sensor = "";
-let currentScreen = "now";
+let sensors = $state([]);
+let sensor = $state("");
+let currentScreen = $state("now");
 let currentDate = new Date();
-let sensorTypeSwitch = "temp";
-let sensorType = sensorTypeSwitch;
-let lastUpdate = new Date(Date.UTC(1970));
-let label = "";
-let data = {};
-let chartCfg;
+let sensorTypeSwitch = $state("temp");
+let sensorType = $state("temp");
+let lastUpdate = $state(new Date(Date.UTC(1970)));
+let label = $state("");
+let data = $state({});
+let chartCfg=$state({});
 let interval;
 
 async function updateData(screenId, sensorId, type, nowDate) {
@@ -95,20 +95,20 @@ async function updateData(screenId, sensorId, type, nowDate) {
 }
 
 function zoom(screen, date) {
-	currentScreen = screen;
-	console.log("zoom", currentScreen, sensor, sensorType, date);
-	updateData(currentScreen, sensor, sensorType, date);
+	console.log("zoom", screen, sensor, sensorType, date);
+	updateData(screen, sensor, sensorType, date);
 }
 
 function setScreen(screen) {
-	currentScreen = screen;
-	updateData(currentScreen, sensor, sensorTypeSwitch, currentDate);
+	updateData(screen, sensor, sensorTypeSwitch, currentDate);
 }
 // start the show
 wDB.getSensors().then((res) => {
 	sensors = res;
-	updateData(currentScreen, sensors[0], sensorTypeSwitch, currentDate);
+  sensor = sensors[0];
+  updateData(currentScreen, sensor, sensorTypeSwitch, currentDate);
 });
+ $effect(()=> { updateData(currentScreen, sensor, sensorTypeSwitch, currentDate)});
 </script>
 
 <main>
@@ -155,7 +155,11 @@ wDB.getSensors().then((res) => {
           [
           <a
             href="#{screen.id}"
-            on:click|preventDefault={() => (setScreen(screen.id))}
+            onclick ={(evt) => {
+              evt.preventDefault();
+              setScreen(screen.id);
+            }
+              }
           >
             {screen.label}
           </a>
