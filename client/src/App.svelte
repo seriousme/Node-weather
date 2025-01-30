@@ -51,7 +51,7 @@ async function updateData(screenId, sensorId, type, nowDate) {
 		clearInterval(interval);
 	}
 	let date = nowDate;
-	if (screenId && sensor && type) {
+	if (screenId && sensorId && type) {
 		const recent = await wDB.getLastUpdate(sensorId, type);
 		switch (screenId) {
 			case "now":
