@@ -1,6 +1,5 @@
-const config = require("./config.json");
-const nano = require("nano")(config.writer);
-const weatherdb = nano.use("weatherdb");
+import { openDB } from "../lib/database.js";
+const weatherdb = openDB();
 
 const bulk = {
 	docs: [],
