@@ -1,5 +1,6 @@
-import { SerialPort } from "serialport";
 import { ReadlineParser } from "@serialport/parser-readline";
+import { SerialPort } from "serialport";
+
 const path = "/dev/ttyUSB0";
 const baudRate = 57600;
 

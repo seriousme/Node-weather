@@ -1,59 +1,46 @@
-// usage node delSensorbyDate.js 98
+// usage node delsensor.js F3 -force
+import { parseArgs } from "node:util"
 import { openDB } from "../lib/database.js";
+
 const weatherdb = openDB();
 
-const bulk = {
-	docs: [],
-};
-
-function parseArgs() {
-	if (process.argv.length > 3) {
-		return { force: process.argv[3] === "-force", sensor: process.argv[2] };
-	}
-	if (process.argv.length > 2) {
-		if (process.argv[2] === "-force") {
-			return { force: true };
-		}
-		return {
-			force: false,
-			sensor: process.argv[2],
-		};
-	}
-	return {};
+const options = {
+	force: { short: "f", type: "boolean" }
 }
 
-function bulkDelete() {
-	weatherdb.bulk(bulk, (err, body) => {
-		console.log(err, body);
-	});
-}
-
-function processRow(row) {
-	if (typeof sensor !== "string" || row.doc.sensorid === sensor) {
-		console.log(row.doc);
-		bulk.docs.push({
-			_id: row.doc._id,
-			_rev: row.doc._rev,
-			_deleted: true,
-		});
+try {
+	const { values, positionals } = parseArgs({ options, allowPositionals: true })
+	const force = values.force;
+	const sensor = positionals[0];
+	if (!sensor) {
+		throw (new Error("missing argument 'sensor'"));
 	}
-}
 
-const { force, sensor } = parseArgs();
-weatherdb
-	.list({
+	const body = await weatherdb.list({
 		start_key: "2021-12-11T17:50:00.000Z",
 		include_docs: true,
 	})
-	.then((body) => {
-		console.log("number of rows:", body.total_rows);
-		body.rows.forEach(processRow);
-		console.log("rows to delete:", bulk.docs.length);
-		if (force) {
-			console.log("starting delete");
-			bulkDelete();
-		} else {
-			console.log("use: -force to delete records");
+
+	console.log("Total number of unknown sensors:", body.total_rows);
+	const bulk = { docs: [], };
+	for (const row of body.rows) {
+		if (typeof sensor !== "string" || row.doc.sensorid === sensor) {
+			bulk.docs.push({
+				_id: row.doc._id,
+				_rev: row.doc._rev,
+				_deleted: true,
+			});
 		}
-	})
-	.catch((err) => console.log("err:", err.reason));
+	}
+	console.log("rows to delete:", bulk.docs.length);
+	if (force) {
+		console.log("starting delete");
+		const res = await weatherdb.bulk(bulk)
+		console.log(res);
+	} else {
+		console.log("use: --force to delete records");
+	}
+} catch (error) {
+	console.log(error.message)
+}
+

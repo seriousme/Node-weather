@@ -1,5 +1,9 @@
 // acquire weather data from 868 weather sensors using the IT+ protocol via a JeeLink and store it in CouchDB
 
+import { ReadlineParser } from "@serialport/parser-readline";
+import { SerialPort } from "serialport";
+import { openDB } from "./lib/database.js";
+
 // log once every five minutes
 const timeInterval = 5000 * 60 * 1;
 // expire unnamed sensors we haven't seen for an hour
@@ -8,51 +12,45 @@ const expireInterval = 60000 * 60 * 1;
 const maxTempDistance = 5;
 const maxHumidDistance = 5;
 
-import { openDB } from "./lib/database.js";
 const weatherdb = openDB();
 
-import { SerialPort } from "serialport";
-import { ReadlineParser } from "@serialport/parser-readline";
+
 const path = "/dev/ttyUSB0";
 const baudRate = 57600;
 
 let sensors = {};
 const settings = {};
 
-function readSensorsFromDb(init) {
+async function readSensorsFromDb(init) {
 	// console.log('before update:', JSON.stringify(sensors))
-	weatherdb.get("config/sensorIDs", (err, body) => {
-		if (!err) {
-			const nowTime = new Date().getTime();
-			if (settings._rev !== body._rev) {
-				// we got an update from the DB
-				sensors = body.sensorIDs;
-				settings._rev = body._rev;
-				console.log(settings, sensors);
-			} else {
-				// no new data in sensor table, check if we need to expire unknown sensors
-				for (const id in sensors) {
-					if (
-						typeof sensors[id].lastSeen !== "undefined" &&
-						nowTime - sensors[id].lastSeen > expireInterval
-					) {
-						sensors[id] = undefined;
-					}
-				}
-			}
-
-			settings.nextTime = nowTime + timeInterval;
-			// we got valid data back, start the show
-			if (init) {
-				startSerial();
+	await weatherdb.get("config/sensorIDs")
+	const nowTime = Date.now();
+	if (settings._rev !== body._rev) {
+		// we got an update from the DB
+		sensors = body.sensorIDs;
+		settings._rev = body._rev;
+		console.log(settings, sensors);
+	} else {
+		// no new data in sensor table, check if we need to expire unknown sensors
+		for (const id in sensors) {
+			if (
+				typeof sensors[id].lastSeen !== "undefined" &&
+				nowTime - sensors[id].lastSeen > expireInterval
+			) {
+				sensors[id] = undefined;
 			}
 		}
-		// console.log('after update:', JSON.stringify(sensors))
-	});
+	}
+	settings.nextTime = nowTime + timeInterval;
+	// we got valid data back, start the show
+	if (init) {
+		startSerial();
+	}
+	// console.log('after update:', JSON.stringify(sensors))
 }
 
 // helper function to sum an Array
-Array.prototype.sum = function () {
+Array.prototype.sum = () => {
 	return this.reduce((a, b) => a + b);
 };
 
@@ -64,7 +62,7 @@ function validData(data, item, maxDistance) {
 	}
 	let avg = data.sum() / data.length;
 	// define what an outlier is
-	function isNoOutlier(value) {
+	const isNoOutlier = (value) => {
 		return Math.abs(value - avg) < maxDistance;
 	}
 	// filter any outliers from the dataset
@@ -87,14 +85,15 @@ function valuesOk(sensor, temp, humid) {
 }
 
 // store data in database
-function saveData(record) {
+async function saveData(record) {
 	console.log(record.date, record.msg);
-	weatherdb.insert(record, record.date, (err, body, header) => {
-		if (err) {
-			console.log("[weatherdb.insert] ", err.message);
-			return;
-		}
-	});
+	try {
+		await weatherdb.insert(record, record.date)
+	}
+	catch (err) {
+		console.log("[weatherdb.insert] ", err.message);
+		return;
+	}
 }
 
 function idFromSensorId(sensorid) {
@@ -113,7 +112,7 @@ function idFromSensorId(sensorid) {
 }
 
 // process the message received from the serialPort
-function processMsg(msg) {
+async function processMsg(msg) {
 	const now = new Date();
 	const nowTime = now.getTime();
 	const datestr = now.toJSON();
@@ -139,7 +138,7 @@ function processMsg(msg) {
 		if (nowTime >= sensor.nextTime) {
 			// save record if the last values made sense
 			if (valuesOk(sensor, record.temp, record.humid)) {
-				saveData(record);
+				await saveData(record);
 				// and update the interval
 				sensor.nextTime = nowTime + timeInterval;
 				// and reset the outlier cache
@@ -150,7 +149,7 @@ function processMsg(msg) {
 	}
 	// try to update the sensor ID's in the same interval
 	if (nowTime >= settings.nextTime) {
-		readSensorsFromDb(false);
+		await readSensorsFromDb(false);
 	}
 }
 

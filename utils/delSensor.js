@@ -1,64 +1,49 @@
 // usage node delsensor.js F3 -force
+import { parseArgs } from "node:util"
 import { openDB } from "../lib/database.js";
+
 const weatherdb = openDB();
 
-const bulk = {
-	docs: [],
-};
+const options = {
+	force: { short: "f", type: "boolean" }
+}
 
-function parseArgs() {
-	if (process.argv.length > 3) {
-		return { force: process.argv[3] === "-force", sensor: process.argv[2] };
+try {
+	const { values, positionals } = parseArgs({ options, allowPositionals: true })
+	const force = values.force;
+	const sensor = positionals[0];
+	if (!sensor) {
+		throw (new Error("missing argument 'sensor'"));
 	}
-	if (process.argv.length > 2) {
-		if (process.argv[2] === "-force") {
-			return { force: true };
+
+	const body = await weatherdb.view(
+		"data",
+		"unknownSensors",
+		{
+			reduce: false,
+			include_docs: true,
+		})
+
+	console.log("Total number of unknown sensors:", body.total_rows);
+	const bulk = { docs: [], };
+	for (const row of body.rows) {
+		if (typeof sensor !== "string" || row.doc.sensorid === sensor) {
+			bulk.docs.push({
+				_id: row.doc._id,
+				_rev: row.doc._rev,
+				_deleted: true,
+			});
 		}
-		return {
-			force: false,
-			sensor: process.argv[2],
-		};
 	}
-	return {};
-}
-
-function bulkDelete() {
-	weatherdb.bulk(bulk, (err, body) => {
-		console.log(err, body);
-	});
-}
-
-function processRow(row) {
-	if (typeof sensor !== "string" || row.doc.sensorid === sensor) {
-		bulk.docs.push({
-			_id: row.doc._id,
-			_rev: row.doc._rev,
-			_deleted: true,
-		});
+	console.log("rows to delete:", bulk.docs.length);
+	if (force) {
+		console.log("starting delete");
+		const res = await weatherdb.bulk(bulk)
+		console.log(res);
+	} else {
+		console.log("use: --force to delete records");
 	}
+} catch (error) {
+	console.log(error.message)
 }
 
-const { force, sensor} = parseArgs();
-weatherdb.view(
-	"data",
-	"unknownSensors",
-	{
-		reduce: false,
-		include_docs: true,
-	},
-	(err, body) => {
-		if (!err) {
-			console.log("Total number of unknown sensors:", body.total_rows);
-			body.rows.forEach(processRow);
-			console.log("rows to delete:", bulk.docs.length);
-			if (force) {
-				console.log("starting delete");
-				bulkDelete();
-			} else {
-				console.log("use: -force to delete records");
-			}
-		} else {
-			console.log("err:", err.reason);
-		}
-	},
-);
