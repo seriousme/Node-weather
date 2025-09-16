@@ -23,7 +23,7 @@ const settings = {};
 
 async function readSensorsFromDb(init) {
 	// console.log('before update:', JSON.stringify(sensors))
-	await weatherdb.get("config/sensorIDs")
+	const body = await weatherdb.get("config/sensorIDs")
 	const nowTime = Date.now();
 	if (settings._rev !== body._rev) {
 		// we got an update from the DB
