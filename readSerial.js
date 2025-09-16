@@ -50,8 +50,8 @@ async function readSensorsFromDb(init) {
 }
 
 // helper function to sum an Array
-Array.prototype.sum = () => {
-	return this.reduce((a, b) => a + b);
+function sum(arr) {
+	return arr.reduce((a, b) => a + b);
 };
 
 // filter outliers from sensor data
@@ -60,7 +60,7 @@ function validData(data, item, maxDistance) {
 	if (data.length < 3) {
 		return false;
 	}
-	let avg = data.sum() / data.length;
+	let avg = sum(data) / data.length;
 	// define what an outlier is
 	const isNoOutlier = (value) => {
 		return Math.abs(value - avg) < maxDistance;
@@ -68,7 +68,7 @@ function validData(data, item, maxDistance) {
 	// filter any outliers from the dataset
 	const result = data.filter(isNoOutlier);
 	// check if the item was an outlier itself
-	avg = result.sum() / result.length;
+	avg = sum(result) / result.length;
 	if (!isNoOutlier(item)) {
 		return false;
 	}
