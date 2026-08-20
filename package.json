@@ -28,5 +28,8 @@
   "bugs": {
     "url": "https://github.com/seriousme/Node-weather/issues"
   },
-  "homepage": "https://github.com/seriousme/Node-weather#readme"
+  "homepage": "https://github.com/seriousme/Node-weather#readme",
+  "allowScripts": {
+    "@serialport/bindings-cpp@13.0.0": true
+  }
 }
