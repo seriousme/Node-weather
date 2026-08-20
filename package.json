@@ -7,7 +7,7 @@
   "dependencies": {
     "@serialport/parser-readline": "^13.0.0",
     "express": "^5.2.1",
-    "nano": "^11.0.5",
+    "nano": "^11.0.6",
     "serialport": "^13.0.0"
   },
   "devDependencies": {},
