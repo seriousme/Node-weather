@@ -27,7 +27,7 @@ try {
   const body = weatherdb.get("config/sensorIDs");
   const sensors = body.sensorIDs;
   console.log("fetched sensorID's");
-  const unknown = weatherdb.view(
+  const unknown = await weatherdb.view(
     "data",
     "unknownSensors",
     {
