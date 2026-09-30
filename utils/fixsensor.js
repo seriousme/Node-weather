@@ -4,6 +4,10 @@ import { openDB } from "../lib/database.js";
 
 const weatherdb = openDB();
 
+const options = {
+  force: { short: "f", type: "boolean" },
+};
+
 // let sensors={
 // 'F8':{ name:'Buiten' },
 // '6C':{ name:'Kas' }
