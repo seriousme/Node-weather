@@ -26,6 +26,8 @@ const body = await weatherdb.view(
 );
 if (body.rows.length === 1) {
   const newConfigRec = {
+    _id: configRec._id,
+    _rev: configRec._rev,
     sensorIDs: {},
   };
   const sIDs = newConfigRec.sensorIDs;

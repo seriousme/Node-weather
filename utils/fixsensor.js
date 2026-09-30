@@ -24,7 +24,7 @@ try {
     throw (new Error("missing argument 'sensor'"));
   }
 
-  const body = weatherdb.get("config/sensorIDs");
+  const body = await weatherdb.get("config/sensorIDs");
   const sensors = body.sensorIDs;
   console.log("fetched sensorID's");
   const unknown = await weatherdb.view(
