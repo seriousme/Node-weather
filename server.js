@@ -12,5 +12,5 @@ startSerialReader(true);
 const app = Express();
 app.use("/", Express.static(staticSite));
 app.listen(port, () => {
-	console.log("listening");
+  console.log("listening");
 });

@@ -14,7 +14,6 @@ const maxHumidDistance = 5;
 
 const weatherdb = openDB();
 
-
 const path = "/dev/ttyUSB0";
 const baudRate = 57600;
 
@@ -22,145 +21,144 @@ let sensors = {};
 const settings = {};
 
 async function readSensorsFromDb(init) {
-	// console.log('before update:', JSON.stringify(sensors))
-	const body = await weatherdb.get("config/sensorIDs")
-	const nowTime = Date.now();
-	if (settings._rev !== body._rev) {
-		// we got an update from the DB
-		sensors = body.sensorIDs;
-		settings._rev = body._rev;
-		console.log(settings, sensors);
-	} else {
-		// no new data in sensor table, check if we need to expire unknown sensors
-		for (const id in sensors) {
-			if (
-				typeof sensors[id].lastSeen !== "undefined" &&
-				nowTime - sensors[id].lastSeen > expireInterval
-			) {
-				sensors[id] = undefined;
-			}
-		}
-	}
-	settings.nextTime = nowTime + timeInterval;
-	// we got valid data back, start the show
-	if (init) {
-		startSerial();
-	}
-	// console.log('after update:', JSON.stringify(sensors))
+  // console.log('before update:', JSON.stringify(sensors))
+  const body = await weatherdb.get("config/sensorIDs");
+  const nowTime = Date.now();
+  if (settings._rev !== body._rev) {
+    // we got an update from the DB
+    sensors = body.sensorIDs;
+    settings._rev = body._rev;
+    console.log(settings, sensors);
+  } else {
+    // no new data in sensor table, check if we need to expire unknown sensors
+    for (const id in sensors) {
+      if (
+        typeof sensors[id].lastSeen !== "undefined" &&
+        nowTime - sensors[id].lastSeen > expireInterval
+      ) {
+        sensors[id] = undefined;
+      }
+    }
+  }
+  settings.nextTime = nowTime + timeInterval;
+  // we got valid data back, start the show
+  if (init) {
+    startSerial();
+  }
+  // console.log('after update:', JSON.stringify(sensors))
 }
 
 // helper function to sum an Array
 function sum(arr) {
-	return arr.reduce((a, b) => a + b);
-};
+  return arr.reduce((a, b) => a + b);
+}
 
 // filter outliers from sensor data
 function validData(data, item, maxDistance) {
-	// we need at least 3 values to determine an average
-	if (data.length < 3) {
-		return false;
-	}
-	let avg = sum(data) / data.length;
-	// define what an outlier is
-	const isNoOutlier = (value) => {
-		return Math.abs(value - avg) < maxDistance;
-	}
-	// filter any outliers from the dataset
-	const result = data.filter(isNoOutlier);
-	// check if the item was an outlier itself
-	avg = sum(result) / result.length;
-	if (!isNoOutlier(item)) {
-		return false;
-	}
-	// we got a valid item
-	return true;
+  // we need at least 3 values to determine an average
+  if (data.length < 3) {
+    return false;
+  }
+  let avg = sum(data) / data.length;
+  // define what an outlier is
+  const isNoOutlier = (value) => {
+    return Math.abs(value - avg) < maxDistance;
+  };
+  // filter any outliers from the dataset
+  const result = data.filter(isNoOutlier);
+  // check if the item was an outlier itself
+  avg = sum(result) / result.length;
+  if (!isNoOutlier(item)) {
+    return false;
+  }
+  // we got a valid item
+  return true;
 }
 
 // check both temp and humidity
 function valuesOk(sensor, temp, humid) {
-	return (
-		validData(sensor.temps, temp, maxTempDistance) &&
-		validData(sensor.humids, humid, maxHumidDistance)
-	);
+  return (
+    validData(sensor.temps, temp, maxTempDistance) &&
+    validData(sensor.humids, humid, maxHumidDistance)
+  );
 }
 
 // store data in database
 async function saveData(record) {
-	console.log(record.date, record.msg);
-	try {
-		await weatherdb.insert(record, record.date)
-	}
-	catch (err) {
-		console.log("[weatherdb.insert] ", err.message);
-		return;
-	}
+  console.log(record.date, record.msg);
+  try {
+    await weatherdb.insert(record, record.date);
+  } catch (err) {
+    console.log("[weatherdb.insert] ", err.message);
+    return;
+  }
 }
 
 function idFromSensorId(sensorid) {
-	if (typeof sensors[sensorid] === "undefined") {
-		sensors[sensorid] = { name: sensorid };
-	}
-	const sensor = sensors[sensorid];
-	if (typeof sensor.nextTime === "undefined") {
-		// setup the sensor data structure
-		sensor.nextTime = 0;
-		sensor.temps = [];
-		sensor.humids = [];
-		sensor.lastSeen = 0;
-	}
-	return sensor.name;
+  if (typeof sensors[sensorid] === "undefined") {
+    sensors[sensorid] = { name: sensorid };
+  }
+  const sensor = sensors[sensorid];
+  if (typeof sensor.nextTime === "undefined") {
+    // setup the sensor data structure
+    sensor.nextTime = 0;
+    sensor.temps = [];
+    sensor.humids = [];
+    sensor.lastSeen = 0;
+  }
+  return sensor.name;
 }
 
 // process the message received from the serialPort
 async function processMsg(msg) {
-	const now = new Date();
-	const nowTime = now.getTime();
-	const datestr = now.toJSON();
-	// console.log(datestr,msg)
-	// IT+ ID: F0 Temp: 14.8 Humidity: 84 RawData: 9F 05 48
-	const data = msg.split(" ");
-	if (data[0] === "IT+") {
-		const record = {
-			date: datestr,
-			id: idFromSensorId(data[2]),
-			sensorid: data[2],
-			temp: Number(data[4]),
-			humid: Number(data[6]),
-			batt: data[7] === "L" ? data[7] : "ok",
-			msg: msg,
-		};
-		const sensor = sensors[record.sensorid];
-		// retain the values in cache to look for outliers
-		sensor.temps.push(record.temp);
-		sensor.humids.push(record.humid);
-		sensor.lastSeen = nowTime;
-		// has the interval passed ?
-		if (nowTime >= sensor.nextTime) {
-			// save record if the last values made sense
-			if (valuesOk(sensor, record.temp, record.humid)) {
-				await saveData(record);
-				// and update the interval
-				sensor.nextTime = nowTime + timeInterval;
-				// and reset the outlier cache
-				sensor.temps = [];
-				sensor.humids = [];
-			}
-		}
-	}
-	// try to update the sensor ID's in the same interval
-	if (nowTime >= settings.nextTime) {
-		await readSensorsFromDb(false);
-	}
+  const now = new Date();
+  const nowTime = now.getTime();
+  const datestr = now.toJSON();
+  // console.log(datestr,msg)
+  // IT+ ID: F0 Temp: 14.8 Humidity: 84 RawData: 9F 05 48
+  const data = msg.split(" ");
+  if (data[0] === "IT+") {
+    const record = {
+      date: datestr,
+      id: idFromSensorId(data[2]),
+      sensorid: data[2],
+      temp: Number(data[4]),
+      humid: Number(data[6]),
+      batt: data[7] === "L" ? data[7] : "ok",
+      msg: msg,
+    };
+    const sensor = sensors[record.sensorid];
+    // retain the values in cache to look for outliers
+    sensor.temps.push(record.temp);
+    sensor.humids.push(record.humid);
+    sensor.lastSeen = nowTime;
+    // has the interval passed ?
+    if (nowTime >= sensor.nextTime) {
+      // save record if the last values made sense
+      if (valuesOk(sensor, record.temp, record.humid)) {
+        await saveData(record);
+        // and update the interval
+        sensor.nextTime = nowTime + timeInterval;
+        // and reset the outlier cache
+        sensor.temps = [];
+        sensor.humids = [];
+      }
+    }
+  }
+  // try to update the sensor ID's in the same interval
+  if (nowTime >= settings.nextTime) {
+    await readSensorsFromDb(false);
+  }
 }
 
 // start listening to the serialPort
 function startSerial() {
-	const port = new SerialPort({ path, baudRate });
-	const parser = port.pipe(new ReadlineParser({ delimiter: "\r\n" }));
-	parser.on("data", processMsg);
+  const port = new SerialPort({ path, baudRate });
+  const parser = port.pipe(new ReadlineParser({ delimiter: "\r\n" }));
+  parser.on("data", processMsg);
 }
 
 export function startSerialReader() {
-	// this is where it all starts
-	readSensorsFromDb(true);
+  // this is where it all starts
+  readSensorsFromDb(true);
 }
